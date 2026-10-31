@@ -379,7 +379,13 @@ html += `</ul>`;
     html += `<div id="${poolId}-standings" style="display:none"></div>`;
   });
   document.getElementById(elementId).innerHTML = html;
-
+function isValidPickleballScore(scoreA, scoreB) {
+  const winner = Math.max(scoreA, scoreB);
+  const loser = Math.min(scoreA, scoreB);
+  if (winner < 11) return false;
+  if (winner - loser < 2) return false;
+  return true;
+}
   document.querySelectorAll(`#${elementId} .saveScoreBtn`).forEach(btn => {
     btn.addEventListener("click", async () => {
       const matchId = btn.dataset.match;
@@ -391,6 +397,10 @@ html += `</ul>`;
         alert("Please enter both scores before saving.");
         return;
       }
+      if (!isValidPickleballScore(scoreA, scoreB)) {
+  alert("Invalid score. A team must win by at least 2 points, and the winning score must be 11 or higher.");
+  return;
+}
       await saveMatchScore(btn.dataset.division, btn.dataset.pool, btn.dataset.teamA, btn.dataset.teamB, scoreA, scoreB);
       alert("Score saved!");
     });
