@@ -400,9 +400,9 @@ function isValidPickleballScore(scoreA, scoreB) {
     btn.addEventListener("click", async () => {
       const matchId = btn.dataset.match;
       const division = btn.dataset.division;
-const poolName = btn.dataset.pool;
-const teamA = btn.dataset.teama;
-const teamB = btn.dataset.teamb;
+      const poolName = btn.dataset.pool;
+      const teamA = btn.dataset.teama;
+      const teamB = btn.dataset.teamb;
       const scoreAInput = document.querySelector(`#${elementId} .scoreA[data-match="${matchId}"]`);
       const scoreBInput = document.querySelector(`#${elementId} .scoreB[data-match="${matchId}"]`);
       const scoreA = parseInt(scoreAInput.value);
@@ -417,7 +417,27 @@ const teamB = btn.dataset.teamb;
 }
 await saveMatchScore(division, poolName, teamA, teamB, scoreA, scoreB);
 alert("Score saved!");
-}); You've got to be shittin me
+});
+});
+document.querySelectorAll(`#${elementId} .scoreA, #${elementId} .scoreB`).forEach(input => {
+  input.addEventListener("input", () => {
+    const matchId = input.dataset.match;
+    const scoreAInput = document.querySelector(`#${elementId} .scoreA[data-match="${matchId}"]`);
+    const scoreBInput = document.querySelector(`#${elementId} .scoreB[data-match="${matchId}"]`);
+    const saveBtn = document.querySelector(`#${elementId} .saveScoreBtn[data-match="${matchId}"]`);
+    const scoreA = parseInt(scoreAInput.value);
+    const scoreB = parseInt(scoreBInput.value);
+
+    if (!isNaN(scoreA) && !isNaN(scoreB) && !isValidPickleballScore(scoreA, scoreB)) {
+      saveBtn.textContent = "Fix Score";
+      saveBtn.style.backgroundColor = "#d9534f";
+      saveBtn.style.color = "white";
+    } else {
+      saveBtn.textContent = "Save";
+      saveBtn.style.backgroundColor = "";
+      saveBtn.style.color = "";
+    }
+  });
 });
 
   document.querySelectorAll(`#${elementId} .showStandingsBtn`).forEach(btn => {
