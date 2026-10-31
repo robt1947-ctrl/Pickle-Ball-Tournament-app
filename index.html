@@ -180,6 +180,7 @@ function generateRoundRobinMatches(teams) {
   return matches;
 }
 async function getTeamsByDivision(division) {
+  if (!division) { console.warn("Skipped getTeamsByDivision: division is undefined"); return []; }
   const q = query(collection(db, "teams"), where("division", "==", division));
   const snapshot = await getDocs(q);
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -193,6 +194,7 @@ async function savePoolsToFirestore(division, pools) {
 }
 
 async function saveMatchesToFirestore(division, pools) {
+  if (!division) { console.warn("Skipped saveMatchesToFirestore: division is undefined"); return; }
   // Remove any previously saved matches for this division
   const q = query(collection(db, "matches"), where("division", "==", division));
   const existingMatches = await getDocs(q);
@@ -221,6 +223,10 @@ async function saveMatchesToFirestore(division, pools) {
 }
 
 async function saveMatchScore(division, poolName, teamA, teamB, scoreA, scoreB) {
+  if (!division || !poolName || !teamA || !teamB) {
+    console.warn("Skipped saveMatchScore: missing field(s)", { division, poolName, teamA, teamB });
+    return;
+  }
   const q = query(
     collection(db, "matches"),
     where("division", "==", division),
@@ -236,6 +242,10 @@ async function saveMatchScore(division, poolName, teamA, teamB, scoreA, scoreB) 
 }
 
 async function calculateStandings(division, poolLetter, teamNames) {
+  if (!division || !poolLetter) {
+    console.warn("Skipped calculateStandings: missing field(s)", { division, poolLetter });
+    return [];
+  }
   const q = query(
     collection(db, "matches"),
     where("division", "==", division),
@@ -243,7 +253,6 @@ async function calculateStandings(division, poolLetter, teamNames) {
   );
   const snapshot = await getDocs(q);
   const matches = snapshot.docs.map(d => d.data());
-
   const stats = {};
   teamNames.forEach(name => {
     stats[name] = { team: name, wins: 0, losses: 0, pointsFor: 0, pointsAgainst: 0, diff: 0 };
@@ -291,6 +300,7 @@ async function getAdvancingTeams(division, poolsOfNames) {
 }
 
 async function getMatchScores(division) {
+  if (!division) { console.warn("Skipped getMatchScores: division is undefined"); return {}; }
   const q = query(collection(db, "matches"), where("division", "==", division));
   const snapshot = await getDocs(q);
   const scores = {};
