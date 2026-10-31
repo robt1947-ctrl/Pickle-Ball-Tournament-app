@@ -379,7 +379,7 @@ for (let a = 0; a < poolNames.length; a++) {
     html += `<input type="number" class="scoreA" data-match="${matchId}" style="width:40px" placeholder="0" value="${scoreAVal}">`;
     html += ` - `;
     html += `<input type="number" class="scoreB" data-match="${matchId}" style="width:40px" placeholder="0" value="${scoreBVal}">`;
-    html += `<button class="saveScoreBtn" data-match="${matchId}">Save</button>`;
+  html += `<button class="saveScoreBtn" data-match="${matchId}" data-division="${divisionLabel}" data-pool="${poolLetter}" data-teama="${poolNames[a]}" data-teamb="${poolNames[b]}">Save</button>`;
     html += `</li>`;
   }
 }
@@ -399,6 +399,10 @@ function isValidPickleballScore(scoreA, scoreB) {
   document.querySelectorAll(`#${elementId} .saveScoreBtn`).forEach(btn => {
     btn.addEventListener("click", async () => {
       const matchId = btn.dataset.match;
+      const division = btn.dataset.division;
+const poolName = btn.dataset.pool;
+const teamA = btn.dataset.teama;
+const teamB = btn.dataset.teamb;
       const scoreAInput = document.querySelector(`#${elementId} .scoreA[data-match="${matchId}"]`);
       const scoreBInput = document.querySelector(`#${elementId} .scoreB[data-match="${matchId}"]`);
       const scoreA = parseInt(scoreAInput.value);
@@ -411,10 +415,10 @@ function isValidPickleballScore(scoreA, scoreB) {
   alert("Invalid score. A team must win by at least 2 points, and the winning score must be 11 or higher.");
   return;
 }
-      await saveMatchScore(btn.dataset.division, btn.dataset.pool, btn.dataset.teamA, btn.dataset.teamB, scoreA, scoreB);
-      alert("Score saved!");
-    });
-  });
+await saveMatchScore(division, poolName, teamA, teamB, scoreA, scoreB);
+alert("Score saved!");
+});
+});
 
   document.querySelectorAll(`#${elementId} .showStandingsBtn`).forEach(btn => {
     btn.addEventListener("click", async () => {
