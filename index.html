@@ -358,16 +358,22 @@ html += `<div id="${elementId}-advancing" style="display:none"></div>`;
     html += `<p><strong>Pool ${poolLetter}:</strong> ${poolNames.join(", ")}</p>`;
     html += `<div id="${poolId}-matches">`;
     html += `<ul>`;
-    for (let a = 0; a < poolNames.length; a++) {
-      for (let b = a + 1; b < poolNames.length; b++) {
-      const matchId = `${divisionLabel}_${poolLetter}_${poolNames[a]}_vs_${poolNames[b]}`.replace(/[^a-zA-Z0-9]/g, "_");
-        html += `<li>
-          ${poolNames[a]} vs. ${poolNames[b]}
-          <input type="number" class="scoreA" data-match="${matchId}" style="width:40px" placeholder="0">
-          -
-          <input type="number" class="scoreB" data-match="${matchId}" style="width:40px" placeholder="0">
-          <button class="saveScoreBtn" data-match="${matchId}" data-division="${divisionLabel}" data-pool="${poolLetter}" data-team-a="${poolNames[a]}" data-team-b="${poolNames[b]}">Save</button>
-        </li>`;
+for (let a = 0; a < poolNames.length; a++) {
+  for (let b = a + 1; b < poolNames.length; b++) {
+    const matchId = `${divisionLabel}_${poolLetter}_${poolNames[a]}_vs_${poolNames[b]}`.replace(/[^a-zA-Z0-9]/g, "_");
+    const existing = savedScores[matchId];
+    const scoreAVal = existing ? existing.scoreA : "";
+    const scoreBVal = existing ? existing.scoreB : "";
+    html += `<li>`;
+    html += `${poolNames[a]} vs. ${poolNames[b]} `;
+    html += `<input type="number" class="scoreA" data-match="${matchId}" style="width:40px" placeholder="0" value="${scoreAVal}">`;
+    html += ` - `;
+    html += `<input type="number" class="scoreB" data-match="${matchId}" style="width:40px" placeholder="0" value="${scoreBVal}">`;
+    html += `<button class="saveScoreBtn" data-match="${matchId}">Save</button>`;
+    html += `</li>`;
+  }
+}
+html += `</ul>`;
       }
     }
     html += `</ul>`;
