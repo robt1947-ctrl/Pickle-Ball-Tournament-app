@@ -160,6 +160,9 @@ function showDashboard(role) {
  </select><br>
  <button id="bulkAddBtn">Bulk Add Test Teams</button>
  <button id="addTeamBtn">Add Team</button>
+ <br><br>
+<button id="viewScheduleBtn">View Full Schedule</button>
+<div id="fullScheduleContainer"></div>
 ${role.toLowerCase() === "admin" ? `
   <button id="resetBtn">Reset Tournament</button>
   <br><br>
@@ -189,10 +192,14 @@ ${role.toLowerCase() === "admin" ? `
       alert("Please enter a valid number of courts.");
       return;
     }
+  
     await setDoc(doc(db, "settings", "tournamentConfig"), { numCourts: numCourtsValue });
     alert(`Court count updated to ${numCourtsValue}. This will apply to newly generated pools.`);
   });
 }
+  if (document.getElementById("viewScheduleBtn")) {
+  document.getElementById("viewScheduleBtn").addEventListener("click", showFullSchedule);
+}   
   document.getElementById("addTeamBtn").addEventListener("click", async () => {
     const teamName = document.getElementById("teamName").value;
     const player1 = document.getElementById("player1").value;
@@ -451,7 +458,22 @@ async function loadPoolsFromFirestore(division) {
   }
   return null;
 
-}async function renderPools(elementId, divisionLabel, teamCount, poolsOfNames) {
+  async function showFullSchedule() {
+  const snap = await getDocs(collection(db, "matches"));
+  const allMatches = snap.docs.map(d => d.data());
+  allMatches.sort((a, b) => (a.court || 0) - (b.court || 0));
+
+  let html = `<h3>Full Match Schedule</h3><table border="1" cellpadding="6"><tr>
+    <th>Court</th><th>Division</th><th>Pool</th><th>Team A</th><th>Team B</th><th>Score</th></tr>`;
+  allMatches.forEach(m => {
+    const score = (m.scoreA != null && m.scoreB != null) ? `${m.scoreA} - ${m.scoreB}` : "Not played";
+    html += `<tr><td>${m.court}</td><td>${m.division}</td><td>${m.poolName}</td>
+      <td>${m.teamA}</td><td>${m.teamB}</td><td>${score}</td></tr>`;
+  });
+  html += `</table>`;
+  document.getElementById("fullScheduleContainer").innerHTML = html;
+}
+async function renderPools(elementId, divisionLabel, teamCount, poolsOfNames) {
   const savedScores = await getMatchScores(divisionLabel);
   let html = `<h4>${divisionLabel} (${teamCount} teams)</h4>`;
 
