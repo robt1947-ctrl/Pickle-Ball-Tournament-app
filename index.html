@@ -160,7 +160,13 @@ function showDashboard(role) {
  </select><br>
  <button id="bulkAddBtn">Bulk Add Test Teams</button>
  <button id="addTeamBtn">Add Team</button>
- ${role.toLowerCase() === "admin" ? '<button id="resetBtn">Reset Tournament</button>' : ""}
+${role.toLowerCase() === "admin" ? `
+  <button id="resetBtn">Reset Tournament</button>
+  <br><br>
+  <label for="numCourtsInput">Number of Courts Available:</label>
+  <input type="number" id="numCourtsInput" min="1" max="20" placeholder="4" />
+  <button id="saveCourtsBtn">Save Court Count</button>
+` : ""}
  <button id="testPoolsBtn">Test Pool Calculation</button>
  <select id="minGames">
   <option value="3">Minimum 3 games</option>
@@ -176,6 +182,17 @@ function showDashboard(role) {
   document.getElementById("logout-btn").addEventListener("click", () => {
     signOut(auth);
   });
+  if (document.getElementById("saveCourtsBtn")) {
+  document.getElementById("saveCourtsBtn").addEventListener("click", async () => {
+    const numCourtsValue = parseInt(document.getElementById("numCourtsInput").value, 10);
+    if (!numCourtsValue || numCourtsValue < 1) {
+      alert("Please enter a valid number of courts.");
+      return;
+    }
+    await setDoc(doc(db, "settings", "tournamentConfig"), { numCourts: numCourtsValue });
+    alert(`Court count updated to ${numCourtsValue}. This will apply to newly generated pools.`);
+  });
+}
   document.getElementById("addTeamBtn").addEventListener("click", async () => {
     const teamName = document.getElementById("teamName").value;
     const player1 = document.getElementById("player1").value;
