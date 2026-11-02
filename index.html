@@ -353,55 +353,55 @@ ${role.toLowerCase() === "admin" ? `
           await updateDoc(matchDoc.ref, {scoreA, scoreB, completed: true});
         }
       }
-async function showFullSchedule() {
-  const configSnap = await getDoc(doc(db, "settings", "tournamentConfig"));
-  const numCourts = configSnap.exists() ? (configSnap.data().numCourts || 4) : 4;
+      async function showFullSchedule() {
+        const configSnap = await getDoc(doc(db, "settings", "tournamentConfig"));
+        const numCourts = configSnap.exists() ? (configSnap.data().numCourts || 4) : 4;
 
-  const divisions = ["Beginners", "Intermediate"];
-  let allMatches = [];
+        const divisions = ["Beginners", "Intermediate"];
+        let allMatches = [];
 
-  for (const division of divisions) {
-    const poolsData = await loadPoolsFromFirestore(division);
-    if (!poolsData) continue;
-    const savedScores = await getMatchScores(division);
+        for (const division of divisions) {
+          const poolsData = await loadPoolsFromFirestore(division);
+          if (!poolsData) continue;
+          const savedScores = await getMatchScores(division);
 
-    poolsData.forEach((poolNames, i) => {
-      const poolLetter = String.fromCharCode(65 + i);
-      for (let a = 0; a < poolNames.length; a++) {
-        for (let b = a + 1; b < poolNames.length; b++) {
-          const matchId = `${division}_${poolLetter}_${poolNames[a]}_vs_${poolNames[b]}`.replace(/[^a-zA-Z0-9]/g, "_");
-          const existing = savedScores[matchId];
-          allMatches.push({
-            division, pool: poolLetter,
-            teamA: poolNames[a], teamB: poolNames[b],
-            scoreA: existing ? existing.scoreA : null,
-            scoreB: existing ? existing.scoreB : null,
-            completed: existing ? existing.completed : false
+          poolsData.forEach((poolNames, i) => {
+            const poolLetter = String.fromCharCode(65 + i);
+            for (let a = 0; a < poolNames.length; a++) {
+              for (let b = a + 1; b < poolNames.length; b++) {
+                const matchId = `${division}_${poolLetter}_${poolNames[a]}_vs_${poolNames[b]}`.replace(/[^a-zA-Z0-9]/g, "_");
+                const existing = savedScores[matchId];
+                allMatches.push({
+                  division, pool: poolLetter,
+                  teamA: poolNames[a], teamB: poolNames[b],
+                  scoreA: existing ? existing.scoreA : null,
+                  scoreB: existing ? existing.scoreB : null,
+                  completed: existing ? existing.completed : false
+                });
+              }
+            }
           });
         }
+
+        allMatches.forEach((match, index) => {
+          match.court = (index % numCourts) + 1;
+        });
+
+        let html = `<h3>Full Match Schedule</h3>`;
+        html += `<table border="1" cellpadding="5"><tr><th>Court</th><th>Division</th><th>Pool</th><th>Match</th><th>Score</th><th>Status</th></tr>`;
+        allMatches.forEach(match => {
+          const scoreText = (match.scoreA !== null && match.scoreB !== null) ? `${match.scoreA} - ${match.scoreB}` : "Not played";
+          const statusText = match.completed ? "Completed" : "Pending";
+          html += `<tr><td>Court ${match.court}</td><td>${match.division}</td><td>Pool ${match.pool}</td><td>${match.teamA} vs. ${match.teamB}</td><td>${scoreText}</td><td>${statusText}</td></tr>`;
+        });
+        html += `</table>`;
+
+        const scheduleDiv = document.getElementById("fullScheduleContainer");
+        if (scheduleDiv) {
+          scheduleDiv.innerHTML = html;
+          scheduleDiv.style.display = scheduleDiv.style.display === "none" ? "block" : "none";
+        }
       }
-    });
-  }
-
-  allMatches.forEach((match, index) => {
-    match.court = (index % numCourts) + 1;
-  });
-
-  let html = `<h3>Full Match Schedule</h3>`;
-  html += `<table border="1" cellpadding="5"><tr><th>Court</th><th>Division</th><th>Pool</th><th>Match</th><th>Score</th><th>Status</th></tr>`;
-  allMatches.forEach(match => {
-    const scoreText = (match.scoreA !== null && match.scoreB !== null) ? `${match.scoreA} - ${match.scoreB}` : "Not played";
-    const statusText = match.completed ? "Completed" : "Pending";
-    html += `<tr><td>Court ${match.court}</td><td>${match.division}</td><td>Pool ${match.pool}</td><td>${match.teamA} vs. ${match.teamB}</td><td>${scoreText}</td><td>${statusText}</td></tr>`;
-  });
-  html += `</table>`;
-
-  const scheduleDiv = document.getElementById("fullScheduleContainer");
-  if (scheduleDiv) {
-    scheduleDiv.innerHTML = html;
-    scheduleDiv.style.display = scheduleDiv.style.display === "none" ? "block" : "none";
-  }
-}
       async function calculateStandings(division, poolLetter, teamNames) {
         if (!division || !poolLetter) {
           console.warn("Skipped calculateStandings: missing field(s)", {division, poolLetter});
@@ -469,233 +469,243 @@ async function showFullSchedule() {
           const data = d.data();
           scores[d.id] = {scoreA: data.scoreA || 0, scoreB: data.scoreB || 0, completed: data.completed || false};
         });
+
         return scores;
-      }async function renderPools(elementId, divisionLabel, teamCount, poolsOfNames) {
-  const savedScores = await getMatchScores(divisionLabel);
-  let html = `<h4>${divisionLabel} (${teamCount} teams)</h4>`;
-
-  html += `<button class="viewAdvancingBtn" data-division="${divisionLabel}">View Advancing Teams</button>`;
-  html += `<button class="downloadCsvBtn" data-division="${divisionLabel}">Download Results (CSV)</button>`;
-  html += `<button class="printResultsBtn" data-division="${divisionLabel}">Print Results</button>`;
-  html += `<div id="${elementId}-advancing" style="display:none"></div>`;
-  poolsOfNames.forEach((poolNames, i) => {
-    const poolLetter = String.fromCharCode(65 + i);
-    const poolId = `${elementId}-pool-${poolLetter}`;
-    html += `<p><strong>Pool ${poolLetter}:</strong> ${poolNames.join(", ")}</p>`;
-    html += `<div id="${poolId}-matches">`;
-    html += `<ul>`;
-    for (let a = 0; a < poolNames.length; a++) {
-      for (let b = a + 1; b < poolNames.length; b++) {
-        const matchId = `${divisionLabel}_${poolLetter}_${poolNames[a]}_vs_${poolNames[b]}`.replace(/[^a-zA-Z0-9]/g, "_");
-        const existing = savedScores[matchId];
-        const scoreAVal = existing ? existing.scoreA : "";
-        const scoreBVal = existing ? existing.scoreB : "";
-        html += `<li>`;
-        html += `${poolNames[a]} vs. ${poolNames[b]} `;
-        html += `<input type="number" class="scoreA" data-match="${matchId}" style="width:40px" placeholder="0" value="${scoreAVal}">`;
-        html += ` - `;
-        html += `<input type="number" class="scoreB" data-match="${matchId}" style="width:40px" placeholder="0" value="${scoreBVal}">`;
-        html += `<button class="saveScoreBtn" data-match="${matchId}" data-division="${divisionLabel}" data-pool="${poolLetter}" data-teama="${poolNames[a]}" data-teamb="${poolNames[b]}">Save</button>`;
-        html += `</li>`;
       }
-    }
 
-            html += `</ul>`;
-            html += `<button class="showStandingsBtn" data-division="${divisionLabel}" data-pool="${poolLetter}" data-pool-id="${poolId}" data-teams='${JSON.stringify(poolNames)}'>Show Standings</button>`;
-            html += `</div>`;
-            html += `<div id="${poolId}-standings" style="display:none"></div>`;
-          });
-          document.getElementById(elementId).innerHTML = html;
-          function isValidPickleballScore(scoreA, scoreB) {
-            const winner = Math.max(scoreA, scoreB);
-            const loser = Math.min(scoreA, scoreB);
-            if (winner < 11) return false;
-            if (winner - loser < 2) return false;
-            return true;
+      async function loadPoolsFromFirestore(division) {
+        const docSnap = await getDoc(doc(db, "pools", division));
+        if (docSnap.exists()) {
+          return docSnap.data().pools;
+        }
+        return null;
+      }
+      async function renderPools(elementId, divisionLabel, teamCount, poolsOfNames) {
+        const savedScores = await getMatchScores(divisionLabel);
+        let html = `<h4>${divisionLabel} (${teamCount} teams)</h4>`;
+
+        html += `<button class="viewAdvancingBtn" data-division="${divisionLabel}">View Advancing Teams</button>`;
+        html += `<button class="downloadCsvBtn" data-division="${divisionLabel}">Download Results (CSV)</button>`;
+        html += `<button class="printResultsBtn" data-division="${divisionLabel}">Print Results</button>`;
+        html += `<div id="${elementId}-advancing" style="display:none"></div>`;
+        poolsOfNames.forEach((poolNames, i) => {
+          const poolLetter = String.fromCharCode(65 + i);
+          const poolId = `${elementId}-pool-${poolLetter}`;
+          html += `<p><strong>Pool ${poolLetter}:</strong> ${poolNames.join(", ")}</p>`;
+          html += `<div id="${poolId}-matches">`;
+          html += `<ul>`;
+          for (let a = 0; a < poolNames.length; a++) {
+            for (let b = a + 1; b < poolNames.length; b++) {
+              const matchId = `${divisionLabel}_${poolLetter}_${poolNames[a]}_vs_${poolNames[b]}`.replace(/[^a-zA-Z0-9]/g, "_");
+              const existing = savedScores[matchId];
+              const scoreAVal = existing ? existing.scoreA : "";
+              const scoreBVal = existing ? existing.scoreB : "";
+              html += `<li>`;
+              html += `${poolNames[a]} vs. ${poolNames[b]} `;
+              html += `<input type="number" class="scoreA" data-match="${matchId}" style="width:40px" placeholder="0" value="${scoreAVal}">`;
+              html += ` - `;
+              html += `<input type="number" class="scoreB" data-match="${matchId}" style="width:40px" placeholder="0" value="${scoreBVal}">`;
+              html += `<button class="saveScoreBtn" data-match="${matchId}" data-division="${divisionLabel}" data-pool="${poolLetter}" data-teama="${poolNames[a]}" data-teamb="${poolNames[b]}">Save</button>`;
+              html += `</li>`;
+            }
           }
-          document.querySelectorAll(`#${elementId} .saveScoreBtn`).forEach(btn => {
-            btn.addEventListener("click", async () => {
-              const matchId = btn.dataset.match;
-              const division = btn.dataset.division;
-              const poolName = btn.dataset.pool;
-              const teamA = btn.dataset.teama;
-              const teamB = btn.dataset.teamb;
-              const scoreAInput = document.querySelector(`#${elementId} .scoreA[data-match="${matchId}"]`);
-              const scoreBInput = document.querySelector(`#${elementId} .scoreB[data-match="${matchId}"]`);
-              const scoreA = parseInt(scoreAInput.value);
-              const scoreB = parseInt(scoreBInput.value);
-              if (isNaN(scoreA) || isNaN(scoreB)) {
-                alert("Please enter both scores before saving.");
-                return;
-              }
-              if (!isValidPickleballScore(scoreA, scoreB)) {
-                alert("Invalid score. A team must win by at least 2 points, and the winning score must be 11 or higher.");
-                return;
-              }
-              await saveMatchScore(division, poolName, teamA, teamB, scoreA, scoreB);
-              alert("Score saved!");
-            });
-          });
-          document.querySelectorAll(`#${elementId} .scoreA, #${elementId} .scoreB`).forEach(input => {
-            input.addEventListener("input", () => {
-              const matchId = input.dataset.match;
-              const scoreAInput = document.querySelector(`#${elementId} .scoreA[data-match="${matchId}"]`);
-              const scoreBInput = document.querySelector(`#${elementId} .scoreB[data-match="${matchId}"]`);
-              const saveBtn = document.querySelector(`#${elementId} .saveScoreBtn[data-match="${matchId}"]`);
-              const scoreA = parseInt(scoreAInput.value);
-              const scoreB = parseInt(scoreBInput.value);
 
-              if (!isNaN(scoreA) && !isNaN(scoreB) && !isValidPickleballScore(scoreA, scoreB)) {
-                saveBtn.textContent = "Fix Score";
-                saveBtn.style.backgroundColor = "#d9534f";
-                saveBtn.style.color = "white";
-              } else {
-                saveBtn.textContent = "Save";
-                saveBtn.style.backgroundColor = "";
-                saveBtn.style.color = "";
-              }
-            });
-          });
-
-          document.querySelectorAll(`#${elementId} .showStandingsBtn`).forEach(btn => {
-            btn.addEventListener("click", async () => {
-              const division = btn.dataset.division;
-              const poolLetter = btn.dataset.pool;
-              const poolId = btn.dataset.poolId;
-              const teamNames = JSON.parse(btn.dataset.teams);
-              const standings = await calculateStandings(division, poolLetter, teamNames);
-
-              let standingsHtml = `<table border="1" cellpadding="5"><tr><th>Team</th><th>Wins</th><th>Losses</th><th>Diff</th></tr>`;
-              standings.forEach(s => {
-                standingsHtml += `<tr><td>${s.team}</td><td>${s.wins}</td><td>${s.losses}</td><td>${s.diff}</td></tr>`;
-              });
-              standingsHtml += `</table><button class="backToMatchesBtn">Back</button>`;
-
-              const standingsDiv = document.getElementById(`${poolId}-standings`);
-              standingsDiv.innerHTML = standingsHtml;
-              standingsDiv.style.display = "block";
-              document.getElementById(`${poolId}-matches`).style.display = "none";
-
-              standingsDiv.querySelector(".backToMatchesBtn").addEventListener("click", () => {
-                standingsDiv.style.display = "none";
-                document.getElementById(`${poolId}-matches`).style.display = "block";
-              });
-            });
-          });
-
-          document.querySelector(`#${elementId} .viewAdvancingBtn`).addEventListener("click", async () => {
-            const advancingDiv = document.getElementById(`${elementId}-advancing`);
-            if (advancingDiv.style.display === "block") {
-              advancingDiv.style.display = "none";
+          html += `</ul>`;
+          html += `<button class="showStandingsBtn" data-division="${divisionLabel}" data-pool="${poolLetter}" data-pool-id="${poolId}" data-teams='${JSON.stringify(poolNames)}'>Show Standings</button>`;
+          html += `</div>`;
+          html += `<div id="${poolId}-standings" style="display:none"></div>`;
+        });
+        document.getElementById(elementId).innerHTML = html;
+        function isValidPickleballScore(scoreA, scoreB) {
+          const winner = Math.max(scoreA, scoreB);
+          const loser = Math.min(scoreA, scoreB);
+          if (winner < 11) return false;
+          if (winner - loser < 2) return false;
+          return true;
+        }
+        document.querySelectorAll(`#${elementId} .saveScoreBtn`).forEach(btn => {
+          btn.addEventListener("click", async () => {
+            const matchId = btn.dataset.match;
+            const division = btn.dataset.division;
+            const poolName = btn.dataset.pool;
+            const teamA = btn.dataset.teama;
+            const teamB = btn.dataset.teamb;
+            const scoreAInput = document.querySelector(`#${elementId} .scoreA[data-match="${matchId}"]`);
+            const scoreBInput = document.querySelector(`#${elementId} .scoreB[data-match="${matchId}"]`);
+            const scoreA = parseInt(scoreAInput.value);
+            const scoreB = parseInt(scoreBInput.value);
+            if (isNaN(scoreA) || isNaN(scoreB)) {
+              alert("Please enter both scores before saving.");
               return;
             }
-            const results = await getAdvancingTeams(divisionLabel, poolsOfNames);
-            let advancingHtml = `<table border="1" cellpadding="5"><tr><th>Pool</th><th>1st Place</th><th>2nd Place</th></tr>`;
-            results.forEach(r => {
-              advancingHtml += `<tr><td>${r.pool}</td><td>${r.first}</td><td>${r.second}</td></tr>`;
-            });
-            advancingHtml += `</table>`;
-            advancingDiv.innerHTML = advancingHtml;
-            advancingDiv.style.display = "block";
+            if (!isValidPickleballScore(scoreA, scoreB)) {
+              alert("Invalid score. A team must win by at least 2 points, and the winning score must be 11 or higher.");
+              return;
+            }
+            await saveMatchScore(division, poolName, teamA, teamB, scoreA, scoreB);
+            alert("Score saved!");
           });
+        });
+        document.querySelectorAll(`#${elementId} .scoreA, #${elementId} .scoreB`).forEach(input => {
+          input.addEventListener("input", () => {
+            const matchId = input.dataset.match;
+            const scoreAInput = document.querySelector(`#${elementId} .scoreA[data-match="${matchId}"]`);
+            const scoreBInput = document.querySelector(`#${elementId} .scoreB[data-match="${matchId}"]`);
+            const saveBtn = document.querySelector(`#${elementId} .saveScoreBtn[data-match="${matchId}"]`);
+            const scoreA = parseInt(scoreAInput.value);
+            const scoreB = parseInt(scoreBInput.value);
 
-          document.querySelector(`#${elementId} .downloadCsvBtn`).addEventListener("click", async () => {
-            await exportResultsToCSV(divisionLabel, poolsOfNames);
-          });
-
-          document.querySelector(`#${elementId} .printResultsBtn`).addEventListener("click", async () => {
-            await printResults(divisionLabel, poolsOfNames);
-          });
-        }
-        document.getElementById("generateBeginnersBtn").addEventListener("click", async () => {
-          const confirmGenerate = confirm("This will create new pools and matches, overwriting any existing ones. Continue?");
-          if (!confirmGenerate) return;
-          const minGames = parseInt(document.getElementById("minGames").value);
-          const teams = await getTeamsByDivision("Beginners");
-          const poolSizes = calculatePools(teams.length, minGames);
-          const pools = assignTeamsToPools(teams, poolSizes);
-          await savePoolsToFirestore("Beginners", pools);
-          await saveMatchesToFirestore("Beginners", pools);
-          const poolNames = pools.map(pool => pool.map(t => t.teamName));
-          await renderPools("poolResultsBeginners", "Beginners", teams.length, poolNames);
-        });
-        document.getElementById("generateIntermediateBtn").addEventListener("click", async () => {
-          const confirmGenerate = confirm("This will create new pools and matches, overwriting any existing ones. Continue?");
-          if (!confirmGenerate) return;
-          const minGames = parseInt(document.getElementById("minGames").value);
-          const teams = await getTeamsByDivision("Intermediate");
-          const poolSizes = calculatePools(teams.length, minGames);
-          const pools = assignTeamsToPools(teams, poolSizes);
-          await savePoolsToFirestore("Intermediate", pools);
-          await saveMatchesToFirestore("Intermediate", pools);
-          const poolNames = pools.map(pool => pool.map(t => t.teamName));
-          await renderPools("poolResultsIntermediate", "Intermediate", teams.length, poolNames);
-        });
-        (async () => {
-          const savedBeginners = await loadPoolsFromFirestore("Beginners");
-          if (savedBeginners) {
-            const poolNames = savedBeginners.map(p => p.teams);
-            await renderPools("poolResultsBeginners", "Beginners", poolNames.flat().length, poolNames);
-          }
-          const savedIntermediate = await loadPoolsFromFirestore("Intermediate");
-          if (savedIntermediate) {
-            const poolNames = savedIntermediate.map(p => p.teams);
-            await renderPools("poolResultsIntermediate", "Intermediate", poolNames.flat().length, poolNames);
-          }
-        })();
-        document.getElementById("testPoolsBtn").addEventListener("click", () => {
-          console.log("9 teams, 3 min games:", calculatePools(9, 3));
-          console.log("9 teams, 4 min games:", calculatePools(9, 4));
-          console.log("11 teams, 4 min games:", calculatePools(11, 4));
-          console.log("15 teams, 3 min games:", calculatePools(15, 3));
-          console.log("15 teams, 4 min games:", calculatePools(15, 4));
-        });
-        if (role.toLowerCase() === "admin") {
-          document.getElementById("resetBtn").addEventListener("click", async () => {
-            const confirmReset = confirm("Are you sure you want to delete ALL teams? This cannot be undone.");
-            if (confirmReset) {
-              const snapshot = await getDocs(collection(db, "teams"));
-              snapshot.forEach((docSnap) => {
-                deleteDoc(doc(db, "teams", docSnap.id));
-              });
+            if (!isNaN(scoreA) && !isNaN(scoreB) && !isValidPickleballScore(scoreA, scoreB)) {
+              saveBtn.textContent = "Fix Score";
+              saveBtn.style.backgroundColor = "#d9534f";
+              saveBtn.style.color = "white";
+            } else {
+              saveBtn.textContent = "Save";
+              saveBtn.style.backgroundColor = "";
+              saveBtn.style.color = "";
             }
           });
-        }
-        onSnapshot(collection(db, "teams"), (snapshot) => {
-          const list = document.getElementById("teamList");
-          list.innerHTML = "";
-          snapshot.forEach((docSnap) => {
-            const t = docSnap.data();
-            list.innerHTML += `<li>${t.teamName} (${t.division}) - ${t.player1} & ${t.player2} <button class="deleteBtn" data-id="${docSnap.id}">Delete</button></li>`;
-          });
+        });
 
-          document.querySelectorAll(".deleteBtn").forEach((btn) => {
-            btn.addEventListener("click", async (e) => {
-              const id = e.target.getAttribute("data-id");
-              await deleteDoc(doc(db, "teams", id));
+        document.querySelectorAll(`#${elementId} .showStandingsBtn`).forEach(btn => {
+          btn.addEventListener("click", async () => {
+            const division = btn.dataset.division;
+            const poolLetter = btn.dataset.pool;
+            const poolId = btn.dataset.poolId;
+            const teamNames = JSON.parse(btn.dataset.teams);
+            const standings = await calculateStandings(division, poolLetter, teamNames);
+
+            let standingsHtml = `<table border="1" cellpadding="5"><tr><th>Team</th><th>Wins</th><th>Losses</th><th>Diff</th></tr>`;
+            standings.forEach(s => {
+              standingsHtml += `<tr><td>${s.team}</td><td>${s.wins}</td><td>${s.losses}</td><td>${s.diff}</td></tr>`;
+            });
+            standingsHtml += `</table><button class="backToMatchesBtn">Back</button>`;
+
+            const standingsDiv = document.getElementById(`${poolId}-standings`);
+            standingsDiv.innerHTML = standingsHtml;
+            standingsDiv.style.display = "block";
+            document.getElementById(`${poolId}-matches`).style.display = "none";
+
+            standingsDiv.querySelector(".backToMatchesBtn").addEventListener("click", () => {
+              standingsDiv.style.display = "none";
+              document.getElementById(`${poolId}-matches`).style.display = "block";
             });
           });
         });
+
+        document.querySelector(`#${elementId} .viewAdvancingBtn`).addEventListener("click", async () => {
+          const advancingDiv = document.getElementById(`${elementId}-advancing`);
+          if (advancingDiv.style.display === "block") {
+            advancingDiv.style.display = "none";
+            return;
+          }
+          const results = await getAdvancingTeams(divisionLabel, poolsOfNames);
+          let advancingHtml = `<table border="1" cellpadding="5"><tr><th>Pool</th><th>1st Place</th><th>2nd Place</th></tr>`;
+          results.forEach(r => {
+            advancingHtml += `<tr><td>${r.pool}</td><td>${r.first}</td><td>${r.second}</td></tr>`;
+          });
+          advancingHtml += `</table>`;
+          advancingDiv.innerHTML = advancingHtml;
+          advancingDiv.style.display = "block";
+        });
+
+        document.querySelector(`#${elementId} .downloadCsvBtn`).addEventListener("click", async () => {
+          await exportResultsToCSV(divisionLabel, poolsOfNames);
+        });
+
+        document.querySelector(`#${elementId} .printResultsBtn`).addEventListener("click", async () => {
+          await printResults(divisionLabel, poolsOfNames);
+        });
       }
-
-
-      function calculatePools(totalTeams, minGames) {
-        const minPoolSize = minGames + 1;
-
-        let numPools = Math.floor(totalTeams / minPoolSize);
-        if (numPools < 1) numPools = 1;
-
-        const basePoolSize = Math.floor(totalTeams / numPools);
-        const extraTeams = totalTeams % numPools;
-
-        const pools = [];
-        for (let i = 0; i < numPools; i++) {
-          const size = i < extraTeams ? basePoolSize + 1 : basePoolSize;
-          pools.push(size);
+      document.getElementById("generateBeginnersBtn").addEventListener("click", async () => {
+        const confirmGenerate = confirm("This will create new pools and matches, overwriting any existing ones. Continue?");
+        if (!confirmGenerate) return;
+        const minGames = parseInt(document.getElementById("minGames").value);
+        const teams = await getTeamsByDivision("Beginners");
+        const poolSizes = calculatePools(teams.length, minGames);
+        const pools = assignTeamsToPools(teams, poolSizes);
+        await savePoolsToFirestore("Beginners", pools);
+        await saveMatchesToFirestore("Beginners", pools);
+        const poolNames = pools.map(pool => pool.map(t => t.teamName));
+        await renderPools("poolResultsBeginners", "Beginners", teams.length, poolNames);
+      });
+      document.getElementById("generateIntermediateBtn").addEventListener("click", async () => {
+        const confirmGenerate = confirm("This will create new pools and matches, overwriting any existing ones. Continue?");
+        if (!confirmGenerate) return;
+        const minGames = parseInt(document.getElementById("minGames").value);
+        const teams = await getTeamsByDivision("Intermediate");
+        const poolSizes = calculatePools(teams.length, minGames);
+        const pools = assignTeamsToPools(teams, poolSizes);
+        await savePoolsToFirestore("Intermediate", pools);
+        await saveMatchesToFirestore("Intermediate", pools);
+        const poolNames = pools.map(pool => pool.map(t => t.teamName));
+        await renderPools("poolResultsIntermediate", "Intermediate", teams.length, poolNames);
+      });
+      (async () => {
+        const savedBeginners = await loadPoolsFromFirestore("Beginners");
+        if (savedBeginners) {
+          const poolNames = savedBeginners.map(p => p.teams);
+          await renderPools("poolResultsBeginners", "Beginners", poolNames.flat().length, poolNames);
         }
-
-        return pools;
+        const savedIntermediate = await loadPoolsFromFirestore("Intermediate");
+        if (savedIntermediate) {
+          const poolNames = savedIntermediate.map(p => p.teams);
+          await renderPools("poolResultsIntermediate", "Intermediate", poolNames.flat().length, poolNames);
+        }
+      })();
+      document.getElementById("testPoolsBtn").addEventListener("click", () => {
+        console.log("9 teams, 3 min games:", calculatePools(9, 3));
+        console.log("9 teams, 4 min games:", calculatePools(9, 4));
+        console.log("11 teams, 4 min games:", calculatePools(11, 4));
+        console.log("15 teams, 3 min games:", calculatePools(15, 3));
+        console.log("15 teams, 4 min games:", calculatePools(15, 4));
+      });
+      if (role.toLowerCase() === "admin") {
+        document.getElementById("resetBtn").addEventListener("click", async () => {
+          const confirmReset = confirm("Are you sure you want to delete ALL teams? This cannot be undone.");
+          if (confirmReset) {
+            const snapshot = await getDocs(collection(db, "teams"));
+            snapshot.forEach((docSnap) => {
+              deleteDoc(doc(db, "teams", docSnap.id));
+            });
+          }
+        });
       }
+      onSnapshot(collection(db, "teams"), (snapshot) => {
+        const list = document.getElementById("teamList");
+        list.innerHTML = "";
+        snapshot.forEach((docSnap) => {
+          const t = docSnap.data();
+          list.innerHTML += `<li>${t.teamName} (${t.division}) - ${t.player1} & ${t.player2} <button class="deleteBtn" data-id="${docSnap.id}">Delete</button></li>`;
+        });
+
+        document.querySelectorAll(".deleteBtn").forEach((btn) => {
+          btn.addEventListener("click", async (e) => {
+            const id = e.target.getAttribute("data-id");
+            await deleteDoc(doc(db, "teams", id));
+          });
+        });
+      });
+    }
+
+
+    function calculatePools(totalTeams, minGames) {
+      const minPoolSize = minGames + 1;
+
+      let numPools = Math.floor(totalTeams / minPoolSize);
+      if (numPools < 1) numPools = 1;
+
+      const basePoolSize = Math.floor(totalTeams / numPools);
+      const extraTeams = totalTeams % numPools;
+
+      const pools = [];
+      for (let i = 0; i < numPools; i++) {
+        const size = i < extraTeams ? basePoolSize + 1 : basePoolSize;
+        pools.push(size);
+      }
+
+      return pools;
+    }
 
 
   </script>
