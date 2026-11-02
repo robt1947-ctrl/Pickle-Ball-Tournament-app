@@ -353,7 +353,55 @@ ${role.toLowerCase() === "admin" ? `
           await updateDoc(matchDoc.ref, {scoreA, scoreB, completed: true});
         }
       }
+async function showFullSchedule() {
+  const configSnap = await getDoc(doc(db, "settings", "tournamentConfig"));
+  const numCourts = configSnap.exists() ? (configSnap.data().numCourts || 4) : 4;
 
+  const divisions = ["Beginners", "Intermediate"];
+  let allMatches = [];
+
+  for (const division of divisions) {
+    const poolsData = await loadPoolsFromFirestore(division);
+    if (!poolsData) continue;
+    const savedScores = await getMatchScores(division);
+
+    poolsData.forEach((poolNames, i) => {
+      const poolLetter = String.fromCharCode(65 + i);
+      for (let a = 0; a < poolNames.length; a++) {
+        for (let b = a + 1; b < poolNames.length; b++) {
+          const matchId = `${division}_${poolLetter}_${poolNames[a]}_vs_${poolNames[b]}`.replace(/[^a-zA-Z0-9]/g, "_");
+          const existing = savedScores[matchId];
+          allMatches.push({
+            division, pool: poolLetter,
+            teamA: poolNames[a], teamB: poolNames[b],
+            scoreA: existing ? existing.scoreA : null,
+            scoreB: existing ? existing.scoreB : null,
+            completed: existing ? existing.completed : false
+          });
+        }
+      }
+    });
+  }
+
+  allMatches.forEach((match, index) => {
+    match.court = (index % numCourts) + 1;
+  });
+
+  let html = `<h3>Full Match Schedule</h3>`;
+  html += `<table border="1" cellpadding="5"><tr><th>Court</th><th>Division</th><th>Pool</th><th>Match</th><th>Score</th><th>Status</th></tr>`;
+  allMatches.forEach(match => {
+    const scoreText = (match.scoreA !== null && match.scoreB !== null) ? `${match.scoreA} - ${match.scoreB}` : "Not played";
+    const statusText = match.completed ? "Completed" : "Pending";
+    html += `<tr><td>Court ${match.court}</td><td>${match.division}</td><td>Pool ${match.pool}</td><td>${match.teamA} vs. ${match.teamB}</td><td>${scoreText}</td><td>${statusText}</td></tr>`;
+  });
+  html += `</table>`;
+
+  const scheduleDiv = document.getElementById("fullScheduleContainer");
+  if (scheduleDiv) {
+    scheduleDiv.innerHTML = html;
+    scheduleDiv.style.display = scheduleDiv.style.display === "none" ? "block" : "none";
+  }
+}
       async function calculateStandings(division, poolLetter, teamNames) {
         if (!division || !poolLetter) {
           console.warn("Skipped calculateStandings: missing field(s)", {division, poolLetter});
