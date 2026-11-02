@@ -1,116 +1,125 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏓</text></svg>">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏓</text></svg>">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pickleball Tournament</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
   </style>
   <style>
-body {
-  background-color: #F7F7F7;
-  color: #2B2D42;
-  font-family: 'Inter', Arial, sans-serif;
-}
+    body {
+      background-color: #F7F7F7;
+      color: #2B2D42;
+      font-family: 'Inter', Arial, sans-serif;
+    }
 
-  h1, h2, h3 {
-    color: #2B2D42;
-  }
+    h1,
+    h2,
+    h3 {
+      color: #2B2D42;
+    }
 
-  .header-banner {
-  background-color: #2B2D42;
-  color: #FFFFFF;
-  padding: 16px;
-  text-align: center;
-}
-.header-banner h1 {
-  color: #FFFFFF;
-}
+    .header-banner {
+      background-color: #2B2D42;
+      color: #FFFFFF;
+      padding: 16px;
+      text-align: center;
+    }
 
-button {
-  background-color: #2B2D42;
-  color: #FFFFFF;
-  border: none;
-  border-radius: 6px;
-  padding: 8px 14px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
+    .header-banner h1 {
+      color: #FFFFFF;
+    }
 
-button:hover {
-  background-color: #EF8354;
-  color: #2B2D42;
-}
+    button {
+      background-color: #2B2D42;
+      color: #FFFFFF;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 14px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
 
-.saveScoreBtn {
-  background-color: #2B2D42;
-  color: #FFFFFF;
-}
+    button:hover {
+      background-color: #EF8354;
+      color: #2B2D42;
+    }
 
-table {
-  border-collapse: collapse;
-  width: 100%;
-}
+    .saveScoreBtn {
+      background-color: #2B2D42;
+      color: #FFFFFF;
+    }
 
-th {
-  background-color: #2B2D42;
-  color: #FFFFFF;
-  padding: 8px;
-}
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
 
-td {
-  padding: 8px;
-  border-bottom: 1px solid #DDDDDD;
-}
+    th {
+      background-color: #2B2D42;
+      color: #FFFFFF;
+      padding: 8px;
+    }
 
-tr:nth-child(even) {
-  background-color: #EFEFEF;
-}
-</style>
+    td {
+      padding: 8px;
+      border-bottom: 1px solid #DDDDDD;
+    }
+
+    tr:nth-child(even) {
+      background-color: #EFEFEF;
+    }
+  </style>
 </head>
+
 <body>
-<div class="header-banner">
-  <h1>Pickleball Tournament</h1>
-</div>
+  <div class="header-banner">
+    <h1>Pickleball Tournament</h1>
+  </div>
   <div id="app"></div>
 
   <!-- Paste your Firebase SDK script tags here -->
-<script type="module">
-  // Import the functions you need from the SDKs you need
-// All imports first
-import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-analytics.js";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } 
-  from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc } 
-  from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
-import { collection, addDoc, onSnapshot, query, where, getDocs }
-  from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
+  <script type="module">
+    // Import the functions you need from the SDKs you need
+    // All imports first
+    import {initializeApp} from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
+    import {getAnalytics} from "https://www.gstatic.com/firebasejs/13.1.0/firebase-analytics.js";
+    import {getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut}
+      from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
+    import {getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc}
+      from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
+    import {collection, addDoc, onSnapshot, query, where, getDocs}
+      from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
 
-// Then your Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyAufV5p-3K0O38GAlu6eAPa9SYA4d37tu8",
-  authDomain: "round-robin-pickleball-tourna.firebaseapp.com",
-  projectId: "round-robin-pickleball-tourna",
-  storageBucket: "round-robin-pickleball-tourna.firebasestorage.app",
-  messagingSenderId: "696831258600",
-  appId: "1:696831258600:web:c4beab8e9bb9da5383be5d",
-  measurementId: "G-V0C3S0DT3C"
-};
+    // Then your Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyAufV5p-3K0O38GAlu6eAPa9SYA4d37tu8",
+      authDomain: "round-robin-pickleball-tourna.firebaseapp.com",
+      projectId: "round-robin-pickleball-tourna",
+      storageBucket: "round-robin-pickleball-tourna.firebasestorage.app",
+      messagingSenderId: "696831258600",
+      appId: "1:696831258600:web:c4beab8e9bb9da5383be5d",
+      measurementId: "G-V0C3S0DT3C"
+    };
 
-// Then initialize everything
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-const auth = getAuth(app);
-const db = getFirestore(app);
-function showLogin() {
-// This builds the login form on the page
-document.getElementById("app").innerHTML = `
+    // Then initialize everything
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    function showLogin() {
+      // This builds the login form on the page
+      document.getElementById("app").innerHTML = `
   <div id="login-screen">
     <h2>Login</h2>
     <input type="email" id="email" placeholder="Email" /><br>
@@ -120,34 +129,34 @@ document.getElementById("app").innerHTML = `
   </div>
 `;
 
-document.getElementById("login-btn").addEventListener("click", async () => {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-  try {
-    await signInWithEmailAndPassword(auth, email, password);
-  } catch (error) {
-    document.getElementById("login-error").textContent = "Login failed. Check email and password.";
-  }
-});
-}
+      document.getElementById("login-btn").addEventListener("click", async () => {
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+        try {
+          await signInWithEmailAndPassword(auth, email, password);
+        } catch (error) {
+          document.getElementById("login-error").textContent = "Login failed. Check email and password.";
+        }
+      });
+    }
 
-// This checks who is logged in and what role they have
-onAuthStateChanged(auth, async (user) => {
-  if (user) {
-    const userDoc = await getDoc(doc(db, "users", user.uid));
-    const role = userDoc.exists() ? userDoc.data().role : "editor";
-    console.log("Logged in as:", user.email, "Role:", role);
-showDashboard(role);
-    // Next, we'll build the main tournament dashboard here
-  }
-    else {
-    showLogin();
-  }
-});
- 
+    // This checks who is logged in and what role they have
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        const role = userDoc.exists() ? userDoc.data().role : "editor";
+        console.log("Logged in as:", user.email, "Role:", role);
+        showDashboard(role);
+        // Next, we'll build the main tournament dashboard here
+      }
+      else {
+        showLogin();
+      }
+    });
 
-function showDashboard(role) {
-  document.getElementById("app").innerHTML = `
+
+    function showDashboard(role) {
+      document.getElementById("app").innerHTML = `
     <button id="logout-btn">Log Out</button>
     <h2>Team Entry</h2>
 
@@ -182,505 +191,446 @@ ${role.toLowerCase() === "admin" ? `
 <h3>Teams</h3>
 <ul id="teamList"></ul>
   `;
-  document.getElementById("logout-btn").addEventListener("click", () => {
-    signOut(auth);
-  });
-  if (document.getElementById("saveCourtsBtn")) {
-  document.getElementById("saveCourtsBtn").addEventListener("click", async () => {
-    const numCourtsValue = parseInt(document.getElementById("numCourtsInput").value, 10);
-    if (!numCourtsValue || numCourtsValue < 1) {
-      alert("Please enter a valid number of courts.");
-      return;
-    }
-  
-    await setDoc(doc(db, "settings", "tournamentConfig"), { numCourts: numCourtsValue });
-    alert(`Court count updated to ${numCourtsValue}. This will apply to newly generated pools.`);
-  });
-}
-  if (document.getElementById("viewScheduleBtn")) {
-  document.getElementById("viewScheduleBtn").addEventListener("click", showFullSchedule);
-}   
-  document.getElementById("addTeamBtn").addEventListener("click", async () => {
-    const teamName = document.getElementById("teamName").value;
-    const player1 = document.getElementById("player1").value;
-    const player2 = document.getElementById("player2").value;
-    const division = document.getElementById("division").value;
-
-    if (teamName && player1 && player2) {
-      await addDoc(collection(db, "teams"), { teamName, player1, player2, division });
-      document.getElementById("teamName").value = "";
-      document.getElementById("player1").value = "";
-      document.getElementById("player2").value = "";
-          }
-    });
-    document.getElementById("bulkAddBtn").addEventListener("click", async () => {
-  const testTeams = [
-    { teamName: "Dink Dynasty", player1: "Alex Morgan", player2: "Sam Lee", division: "Beginners" },
-    { teamName: "Net Ninjas", player1: "Jordan Kim", player2: "Casey Park", division: "Beginners" },
-    { teamName: "Smash Sisters", player1: "Taylor Reed", player2: "Morgan Blake", division: "Beginners" },
-    { teamName: "Kitchen Crashers", player1: "Jamie Fox", player2: "Drew Hayes", division: "Beginners" },
-    { teamName: "Paddle Pals", player1: "Chris Nolan", player2: "Pat Ryan", division: "Beginners" },
-    { teamName: "Ace Avengers", player1: "Jesse Cole", player2: "Robin Shaw", division: "Beginners" },
-    { teamName: "Volley Vipers", player1: "Dana White", player2: "Skyler Brooks", division: "Beginners" },
-    { teamName: "Lob Legends", player1: "Quinn Adams", player2: "Riley Stone", division: "Beginners" },
-    { teamName: "Serve Squad", player1: "Avery James", player2: "Logan Pierce", division: "Beginners" },
-    { teamName: "Power Paddlers", player1: "Blake Turner", player2: "Cameron Ellis", division: "Intermediate" },
-    { teamName: "Spin Doctors", player1: "Harper Lane", player2: "Rowan Gray", division: "Intermediate" },
-    { teamName: "Fault Line", player1: "Emerson Clark", player2: "Sage Walker", division: "Intermediate" },
-    { teamName: "Rally Rebels", player1: "Finley Scott", player2: "Hayden Moss", division: "Intermediate" },
-    { teamName: "Drop Shot Dragons", player1: "Parker Reyes", player2: "Elliot Vance", division: "Intermediate" },
-    { teamName: "Backspin Bandits", player1: "Reese Carter", player2: "Morgan Lee", division: "Intermediate" },
-    { teamName: "Baseline Bosses", player1: "Jules Owens", player2: "Micah Hart", division: "Intermediate" },
-    { teamName: "Smash Masters", player1: "Tatum Reed", player2: "Shawn Brooks", division: "Intermediate" },
-    { teamName: "Dink or Swim", player1: "Noel Rivera", player2: "Kendall Fox", division: "Intermediate" },
-    { teamName: "Top Spin Titans", player1: "Remy Jordan", player2: "Payton Cruz", division: "Intermediate" },
-    { teamName: "Court Crushers", player1: "Marlowe Bennett", player2: "Sawyer Hughes", division: "Intermediate" }
-  ];
-
-  for (const team of testTeams) {
-    await addDoc(collection(db, "teams"), team);
-  }
-
-  console.log("Bulk test teams added!");
-});
-function shuffleArray(array) {
-  const arr = [...array];
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
-}
-
-function assignTeamsToPools(teams, poolSizes) {
-  const shuffled = shuffleArray(teams);
-  const pools = [];
-  let index = 0;
-  for (const size of poolSizes) {
-    pools.push(shuffled.slice(index, index + size));
-    index += size;
-  }
-  return pools;
-}
-function generateRoundRobinMatches(teams) {
-  const matches = [];
-  for (let i = 0; i < teams.length; i++) {
-    for (let j = i + 1; j < teams.length; j++) {
-      matches.push([teams[i], teams[j]]);
-    }
-  }
-  return matches;
-}
-async function getTeamsByDivision(division) {
-  if (!division) { console.warn("Skipped getTeamsByDivision: division is undefined"); return []; }
-  const q = query(collection(db, "teams"), where("division", "==", division));
-  const snapshot = await getDocs(q);
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-}
-async function savePoolsToFirestore(division, pools) {
-  const poolsData = pools.map((pool, i) => ({
-    poolName: String.fromCharCode(65 + i),
-    teams: pool.map(t => t.teamName)
-  }));
-  await setDoc(doc(db, "pools", division), { pools: poolsData });
-}
-
-async function saveMatchesToFirestore(division, pools) {
-  if (!division) { console.warn("Skipped saveMatchesToFirestore: division is undefined"); return; }
-
-  // Remove any previously saved matches for this division
-  const q = query(collection(db, "matches"), where("division", "==", division));
-  const existingMatches = await getDocs(q);
-  for (const docSnap of existingMatches.docs) {
-    await deleteDoc(docSnap.ref);
-  }
-
-  // Read the current number of courts from settings
-  const settingsSnap = await getDoc(doc(db, "settings", "tournamentConfig"));
-  const numCourts = settingsSnap.exists() ? settingsSnap.data().numCourts : 4;
-
-  // Global counter so courts keep rotating across every pool
-  let courtCounter = 0;
-
-  // Create a new match document for every matchup in every pool
-  for (let i = 0; i < pools.length; i++) {
-    const poolLetter = String.fromCharCode(65 + i);
-    const matches = generateRoundRobinMatches(pools[i]);
-    for (const [teamA, teamB] of matches) {
-      const courtNumber = (courtCounter % numCourts) + 1;
-      courtCounter++;
-
-      const matchId = `${division}_${poolLetter}_${teamA.teamName}_vs_${teamB.teamName}`
-        .replace(/[^a-zA-Z0-9]/g, "_");
-      await setDoc(doc(db, "matches", matchId), {
-        division: division,
-        poolName: poolLetter,
-        teamA: teamA.teamName,
-        teamB: teamB.teamName,
-        scoreA: null,
-        scoreB: null,
-        completed: false,
-        court: courtNumber
+      document.getElementById("logout-btn").addEventListener("click", () => {
+        signOut(auth);
       });
-    }
-  }
-}
+      if (document.getElementById("saveCourtsBtn")) {
+        document.getElementById("saveCourtsBtn").addEventListener("click", async () => {
+          const numCourtsValue = parseInt(document.getElementById("numCourtsInput").value, 10);
+          if (!numCourtsValue || numCourtsValue < 1) {
+            alert("Please enter a valid number of courts.");
+            return;
+          }
 
-async function saveMatchScore(division, poolName, teamA, teamB, scoreA, scoreB) {
-  if (!division || !poolName || !teamA || !teamB) {
-    console.warn("Skipped saveMatchScore: missing field(s)", { division, poolName, teamA, teamB });
-    return;
-  }
-  const q = query(
-    collection(db, "matches"),
-    where("division", "==", division),
-    where("poolName", "==", poolName),
-    where("teamA", "==", teamA),
-    where("teamB", "==", teamB)
-  );
-  const snapshot = await getDocs(q);
-  if (!snapshot.empty) {
-    const matchDoc = snapshot.docs[0];
-    await updateDoc(matchDoc.ref, { scoreA, scoreB, completed: true });
-  }
-}
+          await setDoc(doc(db, "settings", "tournamentConfig"), {numCourts: numCourtsValue});
+          alert(`Court count updated to ${numCourtsValue}. This will apply to newly generated pools.`);
+        });
+      }
+      if (document.getElementById("viewScheduleBtn")) {
+        document.getElementById("viewScheduleBtn").addEventListener("click", showFullSchedule);
+      }
+      document.getElementById("addTeamBtn").addEventListener("click", async () => {
+        const teamName = document.getElementById("teamName").value;
+        const player1 = document.getElementById("player1").value;
+        const player2 = document.getElementById("player2").value;
+        const division = document.getElementById("division").value;
 
-async function calculateStandings(division, poolLetter, teamNames) {
-  if (!division || !poolLetter) {
-    console.warn("Skipped calculateStandings: missing field(s)", { division, poolLetter });
-    return [];
-  }
-  const q = query(
-    collection(db, "matches"),
-    where("division", "==", division),
-    where("poolName", "==", poolLetter)
-  );
-  const snapshot = await getDocs(q);
-  const matches = snapshot.docs.map(d => d.data());
-  const stats = {};
-  teamNames.forEach(name => {
-    stats[name] = { team: name, wins: 0, losses: 0, pointsFor: 0, pointsAgainst: 0, diff: 0 };
-  });
+        if (teamName && player1 && player2) {
+          await addDoc(collection(db, "teams"), {teamName, player1, player2, division});
+          document.getElementById("teamName").value = "";
+          document.getElementById("player1").value = "";
+          document.getElementById("player2").value = "";
+        }
+      });
+      document.getElementById("bulkAddBtn").addEventListener("click", async () => {
+        const testTeams = [
+          {teamName: "Dink Dynasty", player1: "Alex Morgan", player2: "Sam Lee", division: "Beginners"},
+          {teamName: "Net Ninjas", player1: "Jordan Kim", player2: "Casey Park", division: "Beginners"},
+          {teamName: "Smash Sisters", player1: "Taylor Reed", player2: "Morgan Blake", division: "Beginners"},
+          {teamName: "Kitchen Crashers", player1: "Jamie Fox", player2: "Drew Hayes", division: "Beginners"},
+          {teamName: "Paddle Pals", player1: "Chris Nolan", player2: "Pat Ryan", division: "Beginners"},
+          {teamName: "Ace Avengers", player1: "Jesse Cole", player2: "Robin Shaw", division: "Beginners"},
+          {teamName: "Volley Vipers", player1: "Dana White", player2: "Skyler Brooks", division: "Beginners"},
+          {teamName: "Lob Legends", player1: "Quinn Adams", player2: "Riley Stone", division: "Beginners"},
+          {teamName: "Serve Squad", player1: "Avery James", player2: "Logan Pierce", division: "Beginners"},
+          {teamName: "Power Paddlers", player1: "Blake Turner", player2: "Cameron Ellis", division: "Intermediate"},
+          {teamName: "Spin Doctors", player1: "Harper Lane", player2: "Rowan Gray", division: "Intermediate"},
+          {teamName: "Fault Line", player1: "Emerson Clark", player2: "Sage Walker", division: "Intermediate"},
+          {teamName: "Rally Rebels", player1: "Finley Scott", player2: "Hayden Moss", division: "Intermediate"},
+          {teamName: "Drop Shot Dragons", player1: "Parker Reyes", player2: "Elliot Vance", division: "Intermediate"},
+          {teamName: "Backspin Bandits", player1: "Reese Carter", player2: "Morgan Lee", division: "Intermediate"},
+          {teamName: "Baseline Bosses", player1: "Jules Owens", player2: "Micah Hart", division: "Intermediate"},
+          {teamName: "Smash Masters", player1: "Tatum Reed", player2: "Shawn Brooks", division: "Intermediate"},
+          {teamName: "Dink or Swim", player1: "Noel Rivera", player2: "Kendall Fox", division: "Intermediate"},
+          {teamName: "Top Spin Titans", player1: "Remy Jordan", player2: "Payton Cruz", division: "Intermediate"},
+          {teamName: "Court Crushers", player1: "Marlowe Bennett", player2: "Sawyer Hughes", division: "Intermediate"}
+        ];
 
-  matches.forEach(m => {
-    if (!m.completed) return;
-    stats[m.teamA].pointsFor += m.scoreA;
-    stats[m.teamA].pointsAgainst += m.scoreB;
-    stats[m.teamB].pointsFor += m.scoreB;
-    stats[m.teamB].pointsAgainst += m.scoreA;
-    if (m.scoreA > m.scoreB) { stats[m.teamA].wins++; stats[m.teamB].losses++; }
-    else if (m.scoreB > m.scoreA) { stats[m.teamB].wins++; stats[m.teamA].losses++; }
-  });
+        for (const team of testTeams) {
+          await addDoc(collection(db, "teams"), team);
+        }
 
-  Object.values(stats).forEach(s => s.diff = s.pointsFor - s.pointsAgainst);
+        console.log("Bulk test teams added!");
+      });
+      function shuffleArray(array) {
+        const arr = [...array];
+        for (let i = arr.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+      }
 
-  return Object.values(stats).sort((a, b) => {
-    if (b.wins !== a.wins) return b.wins - a.wins;
-    if (b.diff !== a.diff) return b.diff - a.diff;
-    const headToHead = matches.find(m =>
-      (m.teamA === a.team && m.teamB === b.team) || (m.teamA === b.team && m.teamB === a.team)
-    );
-    if (headToHead && headToHead.completed) {
-      const aScore = headToHead.teamA === a.team ? headToHead.scoreA : headToHead.scoreB;
-      const bScore = headToHead.teamA === b.team ? headToHead.scoreA : headToHead.scoreB;
-      return bScore - aScore;
-    }
-    return 0;
-  });
-}
+      function assignTeamsToPools(teams, poolSizes) {
+        const shuffled = shuffleArray(teams);
+        const pools = [];
+        let index = 0;
+        for (const size of poolSizes) {
+          pools.push(shuffled.slice(index, index + size));
+          index += size;
+        }
+        return pools;
+      }
+      function generateRoundRobinMatches(teams) {
+        const matches = [];
+        for (let i = 0; i < teams.length; i++) {
+          for (let j = i + 1; j < teams.length; j++) {
+            matches.push([teams[i], teams[j]]);
+          }
+        }
+        return matches;
+      }
+      async function getTeamsByDivision(division) {
+        if (!division) {console.warn("Skipped getTeamsByDivision: division is undefined"); return [];}
+        const q = query(collection(db, "teams"), where("division", "==", division));
+        const snapshot = await getDocs(q);
+        return snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+      }
+      async function savePoolsToFirestore(division, pools) {
+        const poolsData = pools.map((pool, i) => ({
+          poolName: String.fromCharCode(65 + i),
+          teams: pool.map(t => t.teamName)
+        }));
+        await setDoc(doc(db, "pools", division), {pools: poolsData});
+      }
 
-async function getAdvancingTeams(division, poolsOfNames) {
-  const results = [];
-  for (let i = 0; i < poolsOfNames.length; i++) {
-    const poolLetter = String.fromCharCode(65 + i);
-    const standings = await calculateStandings(division, poolLetter, poolsOfNames[i]);
-    results.push({
-      pool: poolLetter,
-      first: standings[0] ? standings[0].team : "-",
-      second: standings[1] ? standings[1].team : "-"
-    });
-  }
-  return results;
-}
+      async function saveMatchesToFirestore(division, pools) {
+        if (!division) {console.warn("Skipped saveMatchesToFirestore: division is undefined"); return;}
 
-async function getMatchScores(division) {
-  if (!division) { console.warn("Skipped getMatchScores: division is undefined"); return {}; }
-  const q = query(collection(db, "matches"), where("division", "==", division));
-  const snapshot = await getDocs(q);
-  const scores = {};
-  snapshot.docs.forEach(d => {
-    const data = d.data();
-    scores[d.id] = { scoreA: data.scoreA || 0, scoreB: data.scoreB || 0, completed: data.completed || false };
-  });
-  return scores;
-}
+        // Remove any previously saved matches for this division
+        const q = query(collection(db, "matches"), where("division", "==", division));
+        const existingMatches = await getDocs(q);
+        for (const docSnap of existingMatches.docs) {
+          await deleteDoc(docSnap.ref);
+        }
 
-async function exportResultsToCSV(division, poolsOfNames) {
-  let csvContent = "Pool,Team,Wins,Losses,Diff\n";
-  for (let i = 0; i < poolsOfNames.length; i++) {
-    const poolLetter = String.fromCharCode(65 + i);
-    const standings = await calculateStandings(division, poolLetter, poolsOfNames[i]);
-    standings.forEach(s => {
-      csvContent += `${poolLetter},${s.team},${s.wins},${s.losses},${s.diff}\n`;
-    });
-  }
-  const blob = new Blob([csvContent], { type: "text/csv" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = `${division}-results.csv`;
-  link.click();
-  URL.revokeObjectURL(url);
-}
+        // Read the current number of courts from settings
+        const settingsSnap = await getDoc(doc(db, "settings", "tournamentConfig"));
+        const numCourts = settingsSnap.exists() ? settingsSnap.data().numCourts : 4;
 
-async function printResults(division, poolsOfNames) {
-  let printContent = `<h2>${division} Results</h2>`;
-  for (let i = 0; i < poolsOfNames.length; i++) {
-    const poolLetter = String.fromCharCode(65 + i);
-    const standings = await calculateStandings(division, poolLetter, poolsOfNames[i]);
-    printContent += `<h3>Pool ${poolLetter}</h3>`;
-    printContent += `<table border="1" cellpadding="5"><tr><th>Team</th><th>Wins</th><th>Losses</th><th>Diff</th></tr>`;
-    standings.forEach(s => {
-      printContent += `<tr><td>${s.team}</td><td>${s.wins}</td><td>${s.losses}</td><td>${s.diff}</td></tr>`;
-    });
-    printContent += `</table>`;
-  }
-  const printWindow = window.open('', '_blank');
-  printWindow.document.write(`<html><head><title>${division} Results</title></head><body>${printContent}</body></html>`);
-  printWindow.document.close();
-  printWindow.print();
-}
+        // Global counter so courts keep rotating across every pool
+        let courtCounter = 0;
 
-async function loadPoolsFromFirestore(division) {
-  const docSnap = await getDoc(doc(db, "pools", division));
-  if (docSnap.exists()) {
-    return docSnap.data().pools;
-  }
-  return null;
+        // Create a new match document for every matchup in every pool
+        for (let i = 0; i < pools.length; i++) {
+          const poolLetter = String.fromCharCode(65 + i);
+          const matches = generateRoundRobinMatches(pools[i]);
+          for (const [teamA, teamB] of matches) {
+            const courtNumber = (courtCounter % numCourts) + 1;
+            courtCounter++;
 
-  async function showFullSchedule() {
-  const snap = await getDocs(collection(db, "matches"));
-  const allMatches = snap.docs.map(d => d.data());
-  allMatches.sort((a, b) => (a.court || 0) - (b.court || 0));
+            const matchId = `${division}_${poolLetter}_${teamA.teamName}_vs_${teamB.teamName}`
+              .replace(/[^a-zA-Z0-9]/g, "_");
+            await setDoc(doc(db, "matches", matchId), {
+              division: division,
+              poolName: poolLetter,
+              teamA: teamA.teamName,
+              teamB: teamB.teamName,
+              scoreA: null,
+              scoreB: null,
+              completed: false,
+              court: courtNumber
+            });
+          }
+        }
+      }
 
-  let html = `<h3>Full Match Schedule</h3><table border="1" cellpadding="6"><tr>
-    <th>Court</th><th>Division</th><th>Pool</th><th>Team A</th><th>Team B</th><th>Score</th></tr>`;
-  allMatches.forEach(m => {
-    const score = (m.scoreA != null && m.scoreB != null) ? `${m.scoreA} - ${m.scoreB}` : "Not played";
-    html += `<tr><td>${m.court}</td><td>${m.division}</td><td>${m.poolName}</td>
-      <td>${m.teamA}</td><td>${m.teamB}</td><td>${score}</td></tr>`;
-  });
-  html += `</table>`;
-  document.getElementById("fullScheduleContainer").innerHTML = html;
-}
-async function renderPools(elementId, divisionLabel, teamCount, poolsOfNames) {
+      async function saveMatchScore(division, poolName, teamA, teamB, scoreA, scoreB) {
+        if (!division || !poolName || !teamA || !teamB) {
+          console.warn("Skipped saveMatchScore: missing field(s)", {division, poolName, teamA, teamB});
+          return;
+        }
+        const q = query(
+          collection(db, "matches"),
+          where("division", "==", division),
+          where("poolName", "==", poolName),
+          where("teamA", "==", teamA),
+          where("teamB", "==", teamB)
+        );
+        const snapshot = await getDocs(q);
+        if (!snapshot.empty) {
+          const matchDoc = snapshot.docs[0];
+          await updateDoc(matchDoc.ref, {scoreA, scoreB, completed: true});
+        }
+      }
+
+      async function calculateStandings(division, poolLetter, teamNames) {
+        if (!division || !poolLetter) {
+          console.warn("Skipped calculateStandings: missing field(s)", {division, poolLetter});
+          return [];
+        }
+        const q = query(
+          collection(db, "matches"),
+          where("division", "==", division),
+          where("poolName", "==", poolLetter)
+        );
+        const snapshot = await getDocs(q);
+        const matches = snapshot.docs.map(d => d.data());
+        const stats = {};
+        teamNames.forEach(name => {
+          stats[name] = {team: name, wins: 0, losses: 0, pointsFor: 0, pointsAgainst: 0, diff: 0};
+        });
+
+        matches.forEach(m => {
+          if (!m.completed) return;
+          stats[m.teamA].pointsFor += m.scoreA;
+          stats[m.teamA].pointsAgainst += m.scoreB;
+          stats[m.teamB].pointsFor += m.scoreB;
+          stats[m.teamB].pointsAgainst += m.scoreA;
+          if (m.scoreA > m.scoreB) {stats[m.teamA].wins++; stats[m.teamB].losses++;}
+          else if (m.scoreB > m.scoreA) {stats[m.teamB].wins++; stats[m.teamA].losses++;}
+        });
+
+        Object.values(stats).forEach(s => s.diff = s.pointsFor - s.pointsAgainst);
+
+        return Object.values(stats).sort((a, b) => {
+          if (b.wins !== a.wins) return b.wins - a.wins;
+          if (b.diff !== a.diff) return b.diff - a.diff;
+          const headToHead = matches.find(m =>
+            (m.teamA === a.team && m.teamB === b.team) || (m.teamA === b.team && m.teamB === a.team)
+          );
+          if (headToHead && headToHead.completed) {
+            const aScore = headToHead.teamA === a.team ? headToHead.scoreA : headToHead.scoreB;
+            const bScore = headToHead.teamA === b.team ? headToHead.scoreA : headToHead.scoreB;
+            return bScore - aScore;
+          }
+          return 0;
+        });
+      }
+
+      async function getAdvancingTeams(division, poolsOfNames) {
+        const results = [];
+        for (let i = 0; i < poolsOfNames.length; i++) {
+          const poolLetter = String.fromCharCode(65 + i);
+          const standings = await calculateStandings(division, poolLetter, poolsOfNames[i]);
+          results.push({
+            pool: poolLetter,
+            first: standings[0] ? standings[0].team : "-",
+            second: standings[1] ? standings[1].team : "-"
+          });
+        }
+        return results;
+      }
+
+      async function getMatchScores(division) {
+        if (!division) {console.warn("Skipped getMatchScores: division is undefined"); return {};}
+        const q = query(collection(db, "matches"), where("division", "==", division));
+        const snapshot = await getDocs(q);
+        const scores = {};
+        snapshot.docs.forEach(d => {
+          const data = d.data();
+          scores[d.id] = {scoreA: data.scoreA || 0, scoreB: data.scoreB || 0, completed: data.completed || false};
+        });
+        return scores;
+      }async function renderPools(elementId, divisionLabel, teamCount, poolsOfNames) {
   const savedScores = await getMatchScores(divisionLabel);
   let html = `<h4>${divisionLabel} (${teamCount} teams)</h4>`;
 
-html += `<button class="viewAdvancingBtn" data-division="${divisionLabel}">View Advancing Teams</button>`;
-html += `<button class="downloadCsvBtn" data-division="${divisionLabel}">Download Results (CSV)</button>`;
-html += `<button class="printResultsBtn" data-division="${divisionLabel}">Print Results</button>`;
-html += `<div id="${elementId}-advancing" style="display:none"></div>`;
+  html += `<button class="viewAdvancingBtn" data-division="${divisionLabel}">View Advancing Teams</button>`;
+  html += `<button class="downloadCsvBtn" data-division="${divisionLabel}">Download Results (CSV)</button>`;
+  html += `<button class="printResultsBtn" data-division="${divisionLabel}">Print Results</button>`;
+  html += `<div id="${elementId}-advancing" style="display:none"></div>`;
   poolsOfNames.forEach((poolNames, i) => {
     const poolLetter = String.fromCharCode(65 + i);
     const poolId = `${elementId}-pool-${poolLetter}`;
     html += `<p><strong>Pool ${poolLetter}:</strong> ${poolNames.join(", ")}</p>`;
     html += `<div id="${poolId}-matches">`;
     html += `<ul>`;
-for (let a = 0; a < poolNames.length; a++) {
-  for (let b = a + 1; b < poolNames.length; b++) {
-    const matchId = `${divisionLabel}_${poolLetter}_${poolNames[a]}_vs_${poolNames[b]}`.replace(/[^a-zA-Z0-9]/g, "_");
-    const existing = savedScores[matchId];
-    const scoreAVal = existing ? existing.scoreA : "";
-    const scoreBVal = existing ? existing.scoreB : "";
-    html += `<li>`;
-    html += `${poolNames[a]} vs. ${poolNames[b]} `;
-    html += `<input type="number" class="scoreA" data-match="${matchId}" style="width:40px" placeholder="0" value="${scoreAVal}">`;
-    html += ` - `;
-    html += `<input type="number" class="scoreB" data-match="${matchId}" style="width:40px" placeholder="0" value="${scoreBVal}">`;
-  html += `<button class="saveScoreBtn" data-match="${matchId}" data-division="${divisionLabel}" data-pool="${poolLetter}" data-teama="${poolNames[a]}" data-teamb="${poolNames[b]}">Save</button>`;
-    html += `</li>`;
-  }
-}
-html += `</ul>`;
-    html += `<button class="showStandingsBtn" data-division="${divisionLabel}" data-pool="${poolLetter}" data-pool-id="${poolId}" data-teams='${JSON.stringify(poolNames)}'>Show Standings</button>`;
-    html += `</div>`;
-    html += `<div id="${poolId}-standings" style="display:none"></div>`;
-  });
-  document.getElementById(elementId).innerHTML = html;
-function isValidPickleballScore(scoreA, scoreB) {
-  const winner = Math.max(scoreA, scoreB);
-  const loser = Math.min(scoreA, scoreB);
-  if (winner < 11) return false;
-  if (winner - loser < 2) return false;
-  return true;
-}
-  document.querySelectorAll(`#${elementId} .saveScoreBtn`).forEach(btn => {
-    btn.addEventListener("click", async () => {
-      const matchId = btn.dataset.match;
-      const division = btn.dataset.division;
-      const poolName = btn.dataset.pool;
-      const teamA = btn.dataset.teama;
-      const teamB = btn.dataset.teamb;
-      const scoreAInput = document.querySelector(`#${elementId} .scoreA[data-match="${matchId}"]`);
-      const scoreBInput = document.querySelector(`#${elementId} .scoreB[data-match="${matchId}"]`);
-      const scoreA = parseInt(scoreAInput.value);
-      const scoreB = parseInt(scoreBInput.value);
-      if (isNaN(scoreA) || isNaN(scoreB)) {
-        alert("Please enter both scores before saving.");
-        return;
+    for (let a = 0; a < poolNames.length; a++) {
+      for (let b = a + 1; b < poolNames.length; b++) {
+        const matchId = `${divisionLabel}_${poolLetter}_${poolNames[a]}_vs_${poolNames[b]}`.replace(/[^a-zA-Z0-9]/g, "_");
+        const existing = savedScores[matchId];
+        const scoreAVal = existing ? existing.scoreA : "";
+        const scoreBVal = existing ? existing.scoreB : "";
+        html += `<li>`;
+        html += `${poolNames[a]} vs. ${poolNames[b]} `;
+        html += `<input type="number" class="scoreA" data-match="${matchId}" style="width:40px" placeholder="0" value="${scoreAVal}">`;
+        html += ` - `;
+        html += `<input type="number" class="scoreB" data-match="${matchId}" style="width:40px" placeholder="0" value="${scoreBVal}">`;
+        html += `<button class="saveScoreBtn" data-match="${matchId}" data-division="${divisionLabel}" data-pool="${poolLetter}" data-teama="${poolNames[a]}" data-teamb="${poolNames[b]}">Save</button>`;
+        html += `</li>`;
       }
-      if (!isValidPickleballScore(scoreA, scoreB)) {
-  alert("Invalid score. A team must win by at least 2 points, and the winning score must be 11 or higher.");
-  return;
-}
-await saveMatchScore(division, poolName, teamA, teamB, scoreA, scoreB);
-alert("Score saved!");
-});
-});
-document.querySelectorAll(`#${elementId} .scoreA, #${elementId} .scoreB`).forEach(input => {
-  input.addEventListener("input", () => {
-    const matchId = input.dataset.match;
-    const scoreAInput = document.querySelector(`#${elementId} .scoreA[data-match="${matchId}"]`);
-    const scoreBInput = document.querySelector(`#${elementId} .scoreB[data-match="${matchId}"]`);
-    const saveBtn = document.querySelector(`#${elementId} .saveScoreBtn[data-match="${matchId}"]`);
-    const scoreA = parseInt(scoreAInput.value);
-    const scoreB = parseInt(scoreBInput.value);
-
-    if (!isNaN(scoreA) && !isNaN(scoreB) && !isValidPickleballScore(scoreA, scoreB)) {
-      saveBtn.textContent = "Fix Score";
-      saveBtn.style.backgroundColor = "#d9534f";
-      saveBtn.style.color = "white";
-    } else {
-      saveBtn.textContent = "Save";
-      saveBtn.style.backgroundColor = "";
-      saveBtn.style.color = "";
     }
-  });
-});
 
-  document.querySelectorAll(`#${elementId} .showStandingsBtn`).forEach(btn => {
-    btn.addEventListener("click", async () => {
-      const division = btn.dataset.division;
-      const poolLetter = btn.dataset.pool;
-      const poolId = btn.dataset.poolId;
-      const teamNames = JSON.parse(btn.dataset.teams);
-      const standings = await calculateStandings(division, poolLetter, teamNames);
+            html += `</ul>`;
+            html += `<button class="showStandingsBtn" data-division="${divisionLabel}" data-pool="${poolLetter}" data-pool-id="${poolId}" data-teams='${JSON.stringify(poolNames)}'>Show Standings</button>`;
+            html += `</div>`;
+            html += `<div id="${poolId}-standings" style="display:none"></div>`;
+          });
+          document.getElementById(elementId).innerHTML = html;
+          function isValidPickleballScore(scoreA, scoreB) {
+            const winner = Math.max(scoreA, scoreB);
+            const loser = Math.min(scoreA, scoreB);
+            if (winner < 11) return false;
+            if (winner - loser < 2) return false;
+            return true;
+          }
+          document.querySelectorAll(`#${elementId} .saveScoreBtn`).forEach(btn => {
+            btn.addEventListener("click", async () => {
+              const matchId = btn.dataset.match;
+              const division = btn.dataset.division;
+              const poolName = btn.dataset.pool;
+              const teamA = btn.dataset.teama;
+              const teamB = btn.dataset.teamb;
+              const scoreAInput = document.querySelector(`#${elementId} .scoreA[data-match="${matchId}"]`);
+              const scoreBInput = document.querySelector(`#${elementId} .scoreB[data-match="${matchId}"]`);
+              const scoreA = parseInt(scoreAInput.value);
+              const scoreB = parseInt(scoreBInput.value);
+              if (isNaN(scoreA) || isNaN(scoreB)) {
+                alert("Please enter both scores before saving.");
+                return;
+              }
+              if (!isValidPickleballScore(scoreA, scoreB)) {
+                alert("Invalid score. A team must win by at least 2 points, and the winning score must be 11 or higher.");
+                return;
+              }
+              await saveMatchScore(division, poolName, teamA, teamB, scoreA, scoreB);
+              alert("Score saved!");
+            });
+          });
+          document.querySelectorAll(`#${elementId} .scoreA, #${elementId} .scoreB`).forEach(input => {
+            input.addEventListener("input", () => {
+              const matchId = input.dataset.match;
+              const scoreAInput = document.querySelector(`#${elementId} .scoreA[data-match="${matchId}"]`);
+              const scoreBInput = document.querySelector(`#${elementId} .scoreB[data-match="${matchId}"]`);
+              const saveBtn = document.querySelector(`#${elementId} .saveScoreBtn[data-match="${matchId}"]`);
+              const scoreA = parseInt(scoreAInput.value);
+              const scoreB = parseInt(scoreBInput.value);
 
-      let standingsHtml = `<table border="1" cellpadding="5"><tr><th>Team</th><th>Wins</th><th>Losses</th><th>Diff</th></tr>`;
-      standings.forEach(s => {
-        standingsHtml += `<tr><td>${s.team}</td><td>${s.wins}</td><td>${s.losses}</td><td>${s.diff}</td></tr>`;
-      });
-      standingsHtml += `</table><button class="backToMatchesBtn">Back</button>`;
+              if (!isNaN(scoreA) && !isNaN(scoreB) && !isValidPickleballScore(scoreA, scoreB)) {
+                saveBtn.textContent = "Fix Score";
+                saveBtn.style.backgroundColor = "#d9534f";
+                saveBtn.style.color = "white";
+              } else {
+                saveBtn.textContent = "Save";
+                saveBtn.style.backgroundColor = "";
+                saveBtn.style.color = "";
+              }
+            });
+          });
 
-      const standingsDiv = document.getElementById(`${poolId}-standings`);
-      standingsDiv.innerHTML = standingsHtml;
-      standingsDiv.style.display = "block";
-      document.getElementById(`${poolId}-matches`).style.display = "none";
+          document.querySelectorAll(`#${elementId} .showStandingsBtn`).forEach(btn => {
+            btn.addEventListener("click", async () => {
+              const division = btn.dataset.division;
+              const poolLetter = btn.dataset.pool;
+              const poolId = btn.dataset.poolId;
+              const teamNames = JSON.parse(btn.dataset.teams);
+              const standings = await calculateStandings(division, poolLetter, teamNames);
 
-      standingsDiv.querySelector(".backToMatchesBtn").addEventListener("click", () => {
-        standingsDiv.style.display = "none";
-        document.getElementById(`${poolId}-matches`).style.display = "block";
-      });
-    });
-  });
+              let standingsHtml = `<table border="1" cellpadding="5"><tr><th>Team</th><th>Wins</th><th>Losses</th><th>Diff</th></tr>`;
+              standings.forEach(s => {
+                standingsHtml += `<tr><td>${s.team}</td><td>${s.wins}</td><td>${s.losses}</td><td>${s.diff}</td></tr>`;
+              });
+              standingsHtml += `</table><button class="backToMatchesBtn">Back</button>`;
 
-  document.querySelector(`#${elementId} .viewAdvancingBtn`).addEventListener("click", async () => {
-    const advancingDiv = document.getElementById(`${elementId}-advancing`);
-    if (advancingDiv.style.display === "block") {
-      advancingDiv.style.display = "none";
-      return;
-    }
-    const results = await getAdvancingTeams(divisionLabel, poolsOfNames);
-    let advancingHtml = `<table border="1" cellpadding="5"><tr><th>Pool</th><th>1st Place</th><th>2nd Place</th></tr>`;
-    results.forEach(r => {
-      advancingHtml += `<tr><td>${r.pool}</td><td>${r.first}</td><td>${r.second}</td></tr>`;
-    });
-    advancingHtml += `</table>`;
-    advancingDiv.innerHTML = advancingHtml;
-    advancingDiv.style.display = "block";
-  });
+              const standingsDiv = document.getElementById(`${poolId}-standings`);
+              standingsDiv.innerHTML = standingsHtml;
+              standingsDiv.style.display = "block";
+              document.getElementById(`${poolId}-matches`).style.display = "none";
 
-  document.querySelector(`#${elementId} .downloadCsvBtn`).addEventListener("click", async () => {
-    await exportResultsToCSV(divisionLabel, poolsOfNames);
-  });
+              standingsDiv.querySelector(".backToMatchesBtn").addEventListener("click", () => {
+                standingsDiv.style.display = "none";
+                document.getElementById(`${poolId}-matches`).style.display = "block";
+              });
+            });
+          });
 
-  document.querySelector(`#${elementId} .printResultsBtn`).addEventListener("click", async () => {
-    await printResults(divisionLabel, poolsOfNames);
-  });
-}
-document.getElementById("generateBeginnersBtn").addEventListener("click", async () => {
-  const confirmGenerate = confirm("This will create new pools and matches, overwriting any existing ones. Continue?");
-  if (!confirmGenerate) return;
-  const minGames = parseInt(document.getElementById("minGames").value);
-  const teams = await getTeamsByDivision("Beginners");
-  const poolSizes = calculatePools(teams.length, minGames);
-  const pools = assignTeamsToPools(teams, poolSizes);
-  await savePoolsToFirestore("Beginners", pools);
-  await saveMatchesToFirestore("Beginners", pools);
-  const poolNames = pools.map(pool => pool.map(t => t.teamName));
- await renderPools("poolResultsBeginners", "Beginners", teams.length, poolNames);
-});
-document.getElementById("generateIntermediateBtn").addEventListener("click", async () => {
-  const confirmGenerate = confirm("This will create new pools and matches, overwriting any existing ones. Continue?");
-  if (!confirmGenerate) return;
-  const minGames = parseInt(document.getElementById("minGames").value);
-  const teams = await getTeamsByDivision("Intermediate");
-  const poolSizes = calculatePools(teams.length, minGames);
-  const pools = assignTeamsToPools(teams, poolSizes);
-  await savePoolsToFirestore("Intermediate", pools);
-  await saveMatchesToFirestore("Intermediate", pools);
-  const poolNames = pools.map(pool => pool.map(t => t.teamName));
-  await renderPools("poolResultsIntermediate", "Intermediate", teams.length, poolNames);
-});
-(async () => {
-  const savedBeginners = await loadPoolsFromFirestore("Beginners");
-  if (savedBeginners) {
-    const poolNames = savedBeginners.map(p => p.teams);
-    await renderPools("poolResultsBeginners", "Beginners", poolNames.flat().length, poolNames);
-  }
-  const savedIntermediate = await loadPoolsFromFirestore("Intermediate");
-  if (savedIntermediate) {
-    const poolNames = savedIntermediate.map(p => p.teams);
-    await renderPools("poolResultsIntermediate", "Intermediate", poolNames.flat().length, poolNames);
-  }
-})();
-document.getElementById("testPoolsBtn").addEventListener("click", () => {
-  console.log("9 teams, 3 min games:", calculatePools(9, 3));
-  console.log("9 teams, 4 min games:", calculatePools(9, 4));
-  console.log("11 teams, 4 min games:", calculatePools(11, 4));
-  console.log("15 teams, 3 min games:", calculatePools(15, 3));
-  console.log("15 teams, 4 min games:", calculatePools(15, 4));
-});
-  if (role.toLowerCase() === "admin") {
-  document.getElementById("resetBtn").addEventListener("click", async () => {
-    const confirmReset = confirm("Are you sure you want to delete ALL teams? This cannot be undone.");
-    if (confirmReset) {
-      const snapshot = await getDocs(collection(db, "teams"));
-      snapshot.forEach((docSnap) => {
-        deleteDoc(doc(db, "teams", docSnap.id));
-      });
-    }
-  });
-}
- onSnapshot(collection(db, "teams"), (snapshot) => {
-  const list = document.getElementById("teamList");
-  list.innerHTML = "";
-  snapshot.forEach((docSnap) => {
-    const t = docSnap.data();
-    list.innerHTML += `<li>${t.teamName} (${t.division}) - ${t.player1} & ${t.player2} <button class="deleteBtn" data-id="${docSnap.id}">Delete</button></li>`;
-  });
+          document.querySelector(`#${elementId} .viewAdvancingBtn`).addEventListener("click", async () => {
+            const advancingDiv = document.getElementById(`${elementId}-advancing`);
+            if (advancingDiv.style.display === "block") {
+              advancingDiv.style.display = "none";
+              return;
+            }
+            const results = await getAdvancingTeams(divisionLabel, poolsOfNames);
+            let advancingHtml = `<table border="1" cellpadding="5"><tr><th>Pool</th><th>1st Place</th><th>2nd Place</th></tr>`;
+            results.forEach(r => {
+              advancingHtml += `<tr><td>${r.pool}</td><td>${r.first}</td><td>${r.second}</td></tr>`;
+            });
+            advancingHtml += `</table>`;
+            advancingDiv.innerHTML = advancingHtml;
+            advancingDiv.style.display = "block";
+          });
 
-  document.querySelectorAll(".deleteBtn").forEach((btn) => {
-    btn.addEventListener("click", async (e) => {
-      const id = e.target.getAttribute("data-id");
-      await deleteDoc(doc(db, "teams", id));
-    });
-  });
-});
-}
+          document.querySelector(`#${elementId} .downloadCsvBtn`).addEventListener("click", async () => {
+            await exportResultsToCSV(divisionLabel, poolsOfNames);
+          });
 
-      
+          document.querySelector(`#${elementId} .printResultsBtn`).addEventListener("click", async () => {
+            await printResults(divisionLabel, poolsOfNames);
+          });
+        }
+        document.getElementById("generateBeginnersBtn").addEventListener("click", async () => {
+          const confirmGenerate = confirm("This will create new pools and matches, overwriting any existing ones. Continue?");
+          if (!confirmGenerate) return;
+          const minGames = parseInt(document.getElementById("minGames").value);
+          const teams = await getTeamsByDivision("Beginners");
+          const poolSizes = calculatePools(teams.length, minGames);
+          const pools = assignTeamsToPools(teams, poolSizes);
+          await savePoolsToFirestore("Beginners", pools);
+          await saveMatchesToFirestore("Beginners", pools);
+          const poolNames = pools.map(pool => pool.map(t => t.teamName));
+          await renderPools("poolResultsBeginners", "Beginners", teams.length, poolNames);
+        });
+        document.getElementById("generateIntermediateBtn").addEventListener("click", async () => {
+          const confirmGenerate = confirm("This will create new pools and matches, overwriting any existing ones. Continue?");
+          if (!confirmGenerate) return;
+          const minGames = parseInt(document.getElementById("minGames").value);
+          const teams = await getTeamsByDivision("Intermediate");
+          const poolSizes = calculatePools(teams.length, minGames);
+          const pools = assignTeamsToPools(teams, poolSizes);
+          await savePoolsToFirestore("Intermediate", pools);
+          await saveMatchesToFirestore("Intermediate", pools);
+          const poolNames = pools.map(pool => pool.map(t => t.teamName));
+          await renderPools("poolResultsIntermediate", "Intermediate", teams.length, poolNames);
+        });
+        (async () => {
+          const savedBeginners = await loadPoolsFromFirestore("Beginners");
+          if (savedBeginners) {
+            const poolNames = savedBeginners.map(p => p.teams);
+            await renderPools("poolResultsBeginners", "Beginners", poolNames.flat().length, poolNames);
+          }
+          const savedIntermediate = await loadPoolsFromFirestore("Intermediate");
+          if (savedIntermediate) {
+            const poolNames = savedIntermediate.map(p => p.teams);
+            await renderPools("poolResultsIntermediate", "Intermediate", poolNames.flat().length, poolNames);
+          }
+        })();
+        document.getElementById("testPoolsBtn").addEventListener("click", () => {
+          console.log("9 teams, 3 min games:", calculatePools(9, 3));
+          console.log("9 teams, 4 min games:", calculatePools(9, 4));
+          console.log("11 teams, 4 min games:", calculatePools(11, 4));
+          console.log("15 teams, 3 min games:", calculatePools(15, 3));
+          console.log("15 teams, 4 min games:", calculatePools(15, 4));
+        });
+        if (role.toLowerCase() === "admin") {
+          document.getElementById("resetBtn").addEventListener("click", async () => {
+            const confirmReset = confirm("Are you sure you want to delete ALL teams? This cannot be undone.");
+            if (confirmReset) {
+              const snapshot = await getDocs(collection(db, "teams"));
+              snapshot.forEach((docSnap) => {
+                deleteDoc(doc(db, "teams", docSnap.id));
+              });
+            }
+          });
+        }
+        onSnapshot(collection(db, "teams"), (snapshot) => {
+          const list = document.getElementById("teamList");
+          list.innerHTML = "";
+          snapshot.forEach((docSnap) => {
+            const t = docSnap.data();
+            list.innerHTML += `<li>${t.teamName} (${t.division}) - ${t.player1} & ${t.player2} <button class="deleteBtn" data-id="${docSnap.id}">Delete</button></li>`;
+          });
+
+          document.querySelectorAll(".deleteBtn").forEach((btn) => {
+            btn.addEventListener("click", async (e) => {
+              const id = e.target.getAttribute("data-id");
+              await deleteDoc(doc(db, "teams", id));
+            });
+          });
+        });
+      }
+
+
       function calculatePools(totalTeams, minGames) {
         const minPoolSize = minGames + 1;
 
@@ -700,6 +650,7 @@ document.getElementById("testPoolsBtn").addEventListener("click", () => {
       }
 
 
- </script> 
+  </script>
 </body>
+
 </html>
