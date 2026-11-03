@@ -399,7 +399,7 @@ ${role.toLowerCase() === "admin" ? `
         const scheduleDiv = document.getElementById("fullScheduleContainer");
         if (scheduleDiv) {
           scheduleDiv.innerHTML = html;
-          scheduleDiv.style.display = scheduleDiv.style.display === "none" ? "block" : "none";
+          scheduleDiv.style.display = "block";
         }
       }
       async function calculateStandings(division, poolLetter, teamNames) {
