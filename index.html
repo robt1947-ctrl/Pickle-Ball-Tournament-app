@@ -23,6 +23,20 @@
       font-family: 'Inter', Arial, sans-serif;
     }
 
+    #fullScheduleContainer {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.3);
+  z-index: 1000;
+  max-height: 80vh;
+  overflow-y: auto;
+  display: none;
+}
     h1,
     h2,
     h3 {
@@ -272,14 +286,34 @@ ${role.toLowerCase() === "admin" ? `
         return pools;
       }
       function generateRoundRobinMatches(teams) {
-        const matches = [];
-        for (let i = 0; i < teams.length; i++) {
-          for (let j = i + 1; j < teams.length; j++) {
-            matches.push([teams[i], teams[j]]);
-          }
-        }
-        return matches;
+  let teamList = [...teams];
+
+  if (teamList.length % 2 !== 0) {
+    teamList.push("BYE");
+  }
+
+  const numRounds = teamList.length - 1;
+  const half = teamList.length / 2;
+  const matches = [];
+
+  for (let round = 0; round < numRounds; round++) {
+    for (let i = 0; i < half; i++) {
+      const teamA = teamList[i];
+      const teamB = teamList[teamList.length - 1 - i];
+
+      if (teamA !== "BYE" && teamB !== "BYE") {
+        matches.push([teamA, teamB, round + 1]);
       }
+    }
+
+    const fixedTeam = teamList[0];
+    const rotatingTeams = teamList.slice(1);
+    rotatingTeams.unshift(rotatingTeams.pop());
+    teamList = [fixedTeam, ...rotatingTeams];
+  }
+
+  return matches;
+}
       async function getTeamsByDivision(division) {
         if (!division) {console.warn("Skipped getTeamsByDivision: division is undefined"); return [];}
         const q = query(collection(db, "teams"), where("division", "==", division));
@@ -295,45 +329,59 @@ ${role.toLowerCase() === "admin" ? `
       }
 
       async function saveMatchesToFirestore(division, pools) {
-        if (!division) {console.warn("Skipped saveMatchesToFirestore: division is undefined"); return;}
+  if (!division) { console.warn("Skipped saveMatchesToFirestore: division is undefined"); return; }
 
-        // Remove any previously saved matches for this division
-        const q = query(collection(db, "matches"), where("division", "==", division));
-        const existingMatches = await getDocs(q);
-        for (const docSnap of existingMatches.docs) {
-          await deleteDoc(docSnap.ref);
-        }
+  // Remove any previously saved matches for this division
+  const q = query(collection(db, "matches"), where("division", "==", division));
+  const existingMatches = await getDocs(q);
+  for (const docSnap of existingMatches.docs) {
+    await deleteDoc(docSnap.ref);
+  }
 
-        // Read the current number of courts from settings
-        const settingsSnap = await getDoc(doc(db, "settings", "tournamentConfig"));
-        const numCourts = settingsSnap.exists() ? settingsSnap.data().numCourts : 4;
+  // Read the current number of courts from settings
+  const settingsSnap = await getDoc(doc(db, "settings", "tournamentConfig"));
+  const numCourts = settingsSnap.exists() ? settingsSnap.data().numCourts : 4;
 
-        // Global counter so courts keep rotating across every pool
-        let courtCounter = 0;
+  // Collect every match from every pool first, tagged with its pool letter
+  const allMatches = [];
+  for (let i = 0; i < pools.length; i++) {
+    const poolLetter = String.fromCharCode(65 + i);
+    const matches = generateRoundRobinMatches(pools[i]);
+    for (const [teamA, teamB, round] of matches) {
+      allMatches.push({ poolLetter, teamA, teamB, round });
+    }
+  }
 
-        // Create a new match document for every matchup in every pool
-        for (let i = 0; i < pools.length; i++) {
-          const poolLetter = String.fromCharCode(65 + i);
-          const matches = generateRoundRobinMatches(pools[i]);
-          for (const [teamA, teamB] of matches) {
-            const courtNumber = (courtCounter % numCourts) + 1;
-            courtCounter++;
+  // Group matches by round so courts can rotate fresh within each round
+  const matchesByRound = {};
+  for (const match of allMatches) {
+    if (!matchesByRound[match.round]) matchesByRound[match.round] = [];
+    matchesByRound[match.round].push(match);
+  }
 
-            const matchId = `${division}_${poolLetter}_${teamA.teamName}_vs_${teamB.teamName}`
-              .replace(/[^a-zA-Z0-9]/g, "_");
-            await setDoc(doc(db, "matches", matchId), {
-              division: division,
-              poolName: poolLetter,
-              teamA: teamA.teamName,
-              teamB: teamB.teamName,
-              scoreA: null,
-              scoreB: null,
-              completed: false,
-              court: courtNumber
-            });
-          }
-        }
-      }
+  // Write each match, assigning courts per round instead of globally
+  for (const roundNumber of Object.keys(matchesByRound)) {
+    const roundMatches = matchesByRound[roundNumber];
+    for (let i = 0; i < roundMatches.length; i++) {
+      const { poolLetter, teamA, teamB, round } = roundMatches[i];
+      const courtNumber = (i % numCourts) + 1;
+
+      const matchId = `${division}_${poolLetter}_${teamA.teamName}_vs_${teamB.teamName}`
+        .replace(/[^a-zA-Z0-9]/g, "_");
+      await setDoc(doc(db, "matches", matchId), {
+        division: division,
+        poolName: poolLetter,
+        round: round,
+        teamA: teamA.teamName,
+        teamB: teamB.teamName,
+        scoreA: null,
+        scoreB: null,
+        completed: false,
+        court: courtNumber
+      });
+    }
+  }
+}
 
       async function saveMatchScore(division, poolName, teamA, teamB, scoreA, scoreB) {
         if (!division || !poolName || !teamA || !teamB) {
@@ -354,47 +402,41 @@ ${role.toLowerCase() === "admin" ? `
         }
       }
       async function showFullSchedule() {
-        const configSnap = await getDoc(doc(db, "settings", "tournamentConfig"));
-        const numCourts = configSnap.exists() ? (configSnap.data().numCourts || 4) : 4;
+  const divisions = ["Beginners", "Intermediate"];
+  let html = `<h3>Full Match Schedule</h3>`;
+html += `<button onclick="document.getElementById('fullScheduleContainer').style.display='none'">Close</button>`;
+  for (const division of divisions) {
+    const poolsData = await loadPoolsFromFirestore(division);
+    if (!poolsData) continue;
+    const savedScores = await getMatchScores(division);
 
-        const divisions = ["Beginners", "Intermediate"];
-        let allMatches = [];
+    html += `<h4>${division}</h4>`;
 
-        for (const division of divisions) {
-          const poolsData = await loadPoolsFromFirestore(division);
-          if (!poolsData) continue;
-          const savedScores = await getMatchScores(division);
+    poolsData.forEach(pool => {
+      const poolLetter = pool.poolName;
+      const poolMatches = Object.entries(savedScores)
+        .filter(([matchId, data]) => data.poolName === poolLetter)
+        .map(([matchId, data]) => ({ matchId, ...data }));
 
-          poolsData.forEach((poolNames, i) => {
-            const poolLetter = String.fromCharCode(65 + i);
-            for (let a = 0; a < poolNames.length; a++) {
-              for (let b = a + 1; b < poolNames.length; b++) {
-                const matchId = `${division}_${poolLetter}_${poolNames[a]}_vs_${poolNames[b]}`.replace(/[^a-zA-Z0-9]/g, "_");
-                const existing = savedScores[matchId];
-                allMatches.push({
-                  division, pool: poolLetter,
-                  teamA: poolNames[a], teamB: poolNames[b],
-                  scoreA: existing ? existing.scoreA : null,
-                  scoreB: existing ? existing.scoreB : null,
-                  completed: existing ? existing.completed : false
-                });
-              }
-            }
-          });
-        }
+      const matchesByRound = {};
+      poolMatches.forEach(m => {
+        if (!matchesByRound[m.round]) matchesByRound[m.round] = [];
+        matchesByRound[m.round].push(m);
+      });
 
-        allMatches.forEach((match, index) => {
-          match.court = (index % numCourts) + 1;
-        });
-
-        let html = `<h3>Full Match Schedule</h3>`;
-        html += `<table border="1" cellpadding="5"><tr><th>Court</th><th>Division</th><th>Pool</th><th>Match</th><th>Score</th><th>Status</th></tr>`;
-        allMatches.forEach(match => {
-          const scoreText = (match.scoreA !== null && match.scoreB !== null) ? `${match.scoreA} - ${match.scoreB}` : "Not played";
-          const statusText = match.completed ? "Completed" : "Pending";
-          html += `<tr><td>Court ${match.court}</td><td>${match.division}</td><td>Pool ${match.pool}</td><td>${match.teamA} vs. ${match.teamB}</td><td>${scoreText}</td><td>${statusText}</td></tr>`;
+      html += `<h5>Pool ${poolLetter}</h5>`;
+      Object.keys(matchesByRound).sort((x, y) => x - y).forEach(roundNum => {
+        html += `<h6>Round ${roundNum}</h6><table border="1" cellpadding="5"><tr><th>Court</th><th>Match</th><th>Score</th><th>Status</th></tr>`;
+        matchesByRound[roundNum].forEach(m => {
+          const scoreText = (m.scoreA !== null && m.scoreB !== null) ? `${m.scoreA} - ${m.scoreB}` : "Not played";
+          const statusText = m.completed ? "Completed" : "Pending";
+          html += `<tr><td>Court ${m.court}</td><td>${m.teamA} vs. ${m.teamB}</td><td>${scoreText}</td><td>${statusText}</td></tr>`;
         });
         html += `</table>`;
+      });
+    });
+  }
+
 
         const scheduleDiv = document.getElementById("fullScheduleContainer");
         if (scheduleDiv) {
@@ -402,6 +444,7 @@ ${role.toLowerCase() === "admin" ? `
           scheduleDiv.style.display = "block";
         }
       }
+
       async function calculateStandings(division, poolLetter, teamNames) {
         if (!division || !poolLetter) {
           console.warn("Skipped calculateStandings: missing field(s)", {division, poolLetter});
@@ -461,17 +504,25 @@ ${role.toLowerCase() === "admin" ? `
       }
 
       async function getMatchScores(division) {
-        if (!division) {console.warn("Skipped getMatchScores: division is undefined"); return {};}
-        const q = query(collection(db, "matches"), where("division", "==", division));
-        const snapshot = await getDocs(q);
-        const scores = {};
-        snapshot.docs.forEach(d => {
-          const data = d.data();
-          scores[d.id] = {scoreA: data.scoreA || 0, scoreB: data.scoreB || 0, completed: data.completed || false};
-        });
-
-        return scores;
-      }
+  if (!division) {console.warn("Skipped getMatchScores: division is undefined"); return {};}
+  const q = query(collection(db, "matches"), where("division", "==", division));
+  const snapshot = await getDocs(q);
+  const scores = {};
+  snapshot.docs.forEach(d => {
+    const data = d.data();
+    scores[d.id] = {
+      scoreA: data.scoreA || 0,
+      scoreB: data.scoreB || 0,
+      completed: data.completed || false,
+      round: data.round || 1,
+      poolName: data.poolName,
+      teamA: data.teamA,
+      teamB: data.teamB,
+      court: data.court || null
+    };
+  });
+  return scores;
+}
 
       async function loadPoolsFromFirestore(division) {
         const docSnap = await getDoc(doc(db, "pools", division));
