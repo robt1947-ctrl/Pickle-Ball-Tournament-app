@@ -188,7 +188,7 @@
 <div id="fullScheduleContainer"></div>
 ${role.toLowerCase() === "admin" ? `
   <button id="resetBtn">Reset Tournament</button>
-  <br><br>
+  <br><br> She's bored
   <label for="numCourtsInput">Number of Courts Available:</label>
   <input type="number" id="numCourtsInput" min="1" max="20" placeholder="4" />
   <button id="saveCourtsBtn">Save Court Count</button>
@@ -731,6 +731,7 @@ Object.keys(matchesByRound).sort((x, y) => x - y).forEach(roundNum => {
     await renderPools("poolResultsIntermediate", "Intermediate", poolNames.flat().length, poolNames);
   }
 }
+window.refreshAllPools = refreshAllPools;
 refreshAllPools();
         
       if (document.getElementById("testPoolsBtn")) {
