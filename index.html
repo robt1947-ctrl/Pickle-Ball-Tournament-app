@@ -445,21 +445,21 @@ html += `<button onclick="document.getElementById('fullScheduleContainer').style
         matchesByRound[m.round].push(m);
       });
 
-      html += `<h5>Pool ${poolLetter}</h5>`;
-      Object.keys(matchesByRound).sort((x, y) => x - y).forEach(roundNum => {
-        html += `<h6>Round ${roundNum}</h6><table border="1" cellpadding="5"><tr><th>Court</th><th>Match</th><th>Score</th><th>Status</th></tr>`;
-      const matchId = `${division}_${m.poolName}_${m.teamA}_${m.teamB}`.replace(/\s+/g, "_");
-const statusText = m.completed ? "Completed" : "Pending";
+  html += `<h5>Pool ${poolLetter}</h5>`;
+Object.keys(matchesByRound).sort((x, y) => x - y).forEach(roundNum => {
+  html += `<h6>Round ${roundNum}</h6><table border="1" cellpadding="5"><tr><th>Court</th><th>Match</th><th>Score</th><th>Status</th></tr>`;
+  matchesByRound[roundNum].forEach(m => {
+    const matchId = `${division}_${m.poolName}_${m.teamA}_${m.teamB}`.replace(/\s+/g, "_");
+    const statusText = m.completed ? "Completed" : "Pending";
 
-const scoreCell = m.completed
-  ? `<span id="scoreDisplay_${matchId}">${m.scoreA} - ${m.scoreB}</span> <button onclick="editMatchScore('${matchId}')">Edit</button>`
-  : `<input type="number" id="scoreA_${matchId}" style="width:50px" value="${m.scoreA ?? ''}"> - <input type="number" id="scoreB_${matchId}" style="width:50px" value="${m.scoreB ?? ''}"> <button onclick="submitMatchScore('${matchId}')">Save</button>`;
+    const scoreCell = m.completed
+      ? `<span id="scoreDisplay_${matchId}">${m.scoreA} - ${m.scoreB}</span> <button onclick="editMatchScore('${matchId}')">Edit</button>`
+      : `<input type="number" id="scoreA_${matchId}" style="width:50px" value="${m.scoreA ?? ''}"> - <input type="number" id="scoreB_${matchId}" style="width:50px" value="${m.scoreB ?? ''}"> <button onclick="submitMatchScore('${matchId}')">Save</button>`;
 
-html += `<tr id="row_${matchId}" data-division="${division}" data-pool="${m.poolName}" data-team-a="${m.teamA}" data-team-b="${m.teamB}"><td>Court ${m.court}</td><td>${m.teamA} vs. ${m.teamB}</td><td id="scoreCell_${matchId}">${scoreCell}</td><td id="status_${matchId}">${statusText}</td></tr>`;
-        html += `</table>`;
-      });
-    });
-  }
+    html += `<tr id="row_${matchId}" data-division="${division}" data-pool="${m.poolName}" data-team-a="${m.teamA}" data-team-b="${m.teamB}"><td>Court ${m.court}</td><td>${m.teamA} vs. ${m.teamB}</td><td id="scoreCell_${matchId}">${scoreCell}</td><td id="status_${matchId}">${statusText}</td></tr>`;
+  });
+  html += `</table>`;
+});  
 
 
         const scheduleDiv = document.getElementById("fullScheduleContainer");
