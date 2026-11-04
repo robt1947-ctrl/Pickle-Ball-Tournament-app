@@ -458,11 +458,12 @@ Object.keys(matchesByRound).sort((x, y) => x - y).forEach(roundNum => {
 
     html += `<tr id="row_${matchId}" data-division="${division}" data-pool="${m.poolName}" data-team-a="${m.teamA}" data-team-b="${m.teamB}"><td>Court ${m.court}</td><td>${m.teamA} vs. ${m.teamB}</td><td id="scoreCell_${matchId}">${scoreCell}</td><td id="status_${matchId}">${statusText}</td></tr>`;
   });
-  html += `</table>`;
-});  
+    html += `</table>`;
+});
+    }); // closes poolsData.forEach(pool => {...})
+  } // closes for (const division of divisions) {...}
 
-
-        const scheduleDiv = document.getElementById("fullScheduleContainer");
+  const scheduleDiv = document.getElementById("fullScheduleContainer");
         if (scheduleDiv) {
           scheduleDiv.innerHTML = html;
           scheduleDiv.style.display = "block";
