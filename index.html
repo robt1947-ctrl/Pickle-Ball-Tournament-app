@@ -717,18 +717,20 @@ Object.keys(matchesByRound).sort((x, y) => x - y).forEach(roundNum => {
         const poolNames = pools.map(pool => pool.map(t => t.teamName));
         await renderPools("poolResultsIntermediate", "Intermediate", teams.length, poolNames);
       });
-      (async () => {
-        const savedBeginners = await loadPoolsFromFirestore("Beginners");
-        if (savedBeginners) {
-          const poolNames = savedBeginners.map(p => p.teams);
-          await renderPools("poolResultsBeginners", "Beginners", poolNames.flat().length, poolNames);
-        }
-        const savedIntermediate = await loadPoolsFromFirestore("Intermediate");
-        if (savedIntermediate) {
-          const poolNames = savedIntermediate.map(p => p.teams);
-          await renderPools("poolResultsIntermediate", "Intermediate", poolNames.flat().length, poolNames);
-        }
-      })();
+      async function refreshAllPools() {
+  const savedBeginners = await loadPoolsFromFirestore("Beginners");
+  if (savedBeginners) {
+    const poolNames = savedBeginners.map(p => p.teams);
+    await renderPools("poolResultsBeginners", "Beginners", poolNames.flat().length, poolNames);
+  }
+  const savedIntermediate = await loadPoolsFromFirestore("Intermediate");
+  if (savedIntermediate) {
+    const poolNames = savedIntermediate.map(p => p.teams);
+    await renderPools("poolResultsIntermediate", "Intermediate", poolNames.flat().length, poolNames);
+  }
+}
+refreshAllPools();
+        
       if (document.getElementById("testPoolsBtn")) {
       document.getElementById("testPoolsBtn").addEventListener("click", () => {
         console.log("9 teams, 3 min games:", calculatePools(9, 3));
