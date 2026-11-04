@@ -403,6 +403,25 @@ ${role.toLowerCase() === "admin" ? `<button id="testPoolsBtn">Test Pool Calculat
           await updateDoc(matchDoc.ref, {scoreA, scoreB, completed: true});
         }
       }
+      
+window.editMatchScore = function(matchId) {
+  const display = document.getElementById(`scoreDisplay_${matchId}`);
+  const [scoreA, scoreB] = display.textContent.split(" - ");
+  document.getElementById(`scoreCell_${matchId}`).innerHTML =
+    `<input type="number" id="scoreA_${matchId}" style="width:50px" value="${scoreA.trim()}"> - <input type="number" id="scoreB_${matchId}" style="width:50px" value="${scoreB.trim()}"> <button onclick="submitMatchScore('${matchId}')">Save</button>`;
+};
+
+window.submitMatchScore = async function(matchId) {
+  const row = document.getElementById(`row_${matchId}`);
+  const scoreA = Number(document.getElementById(`scoreA_${matchId}`).value);
+  const scoreB = Number(document.getElementById(`scoreB_${matchId}`).value);
+
+  await saveMatchScore(row.dataset.division, row.dataset.pool, row.dataset.teamA, row.dataset.teamB, scoreA, scoreB);
+
+  document.getElementById(`scoreCell_${matchId}`).innerHTML =
+    `<span id="scoreDisplay_${matchId}">${scoreA} - ${scoreB}</span> <button onclick="editMatchScore('${matchId}')">Edit</button>`;
+  document.getElementById(`status_${matchId}`).textContent = "Completed";
+};
       async function showFullSchedule() {
   const divisions = ["Beginners", "Intermediate"];
   let html = `<h3>Full Match Schedule</h3>`;
@@ -429,10 +448,14 @@ html += `<button onclick="document.getElementById('fullScheduleContainer').style
       html += `<h5>Pool ${poolLetter}</h5>`;
       Object.keys(matchesByRound).sort((x, y) => x - y).forEach(roundNum => {
         html += `<h6>Round ${roundNum}</h6><table border="1" cellpadding="5"><tr><th>Court</th><th>Match</th><th>Score</th><th>Status</th></tr>`;
-        matchesByRound[roundNum].forEach(m => {
-          const scoreText = (m.scoreA !== null && m.scoreB !== null) ? `${m.scoreA} - ${m.scoreB}` : "Not played";
-          const statusText = m.completed ? "Completed" : "Pending";
-          html += `<tr><td>Court ${m.court}</td><td>${m.teamA} vs. ${m.teamB}</td><td>${scoreText}</td><td>${statusText}</td></tr>`;
+        matchesByRound[roundNum].forEach(m => {const matchId = `${m.division}_${m.poolName}_${m.teamA}_${m.teamB}`.replace(/\s+/g, "_");
+const statusText = m.completed ? "Completed" : "Pending";
+
+const scoreCell = m.completed
+  ? `<span id="scoreDisplay_${matchId}">${m.scoreA} - ${m.scoreB}</span> <button onclick="editMatchScore('${matchId}')">Edit</button>`
+  : `<input type="number" id="scoreA_${matchId}" style="width:50px" value="${m.scoreA ?? ''}"> - <input type="number" id="scoreB_${matchId}" style="width:50px" value="${m.scoreB ?? ''}"> <button onclick="submitMatchScore('${matchId}')">Save</button>`;
+
+html += `<tr id="row_${matchId}" data-division="${m.division}" data-pool="${m.poolName}" data-team-a="${m.teamA}" data-team-b="${m.teamB}"><td>Court ${m.court}</td><td>${m.teamA} vs. ${m.teamB}</td><td id="scoreCell_${matchId}">${scoreCell}</td><td id="status_${matchId}">${statusText}</td></tr>`;
         });
         html += `</table>`;
       });
