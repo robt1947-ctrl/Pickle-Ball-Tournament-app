@@ -1,4 +1,4 @@
-<!<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <!-- redeploy trigger -->
 <head>
@@ -370,41 +370,32 @@ ${role.toLowerCase() === "admin" ? `<button id="testPoolsBtn">Test Pool Calculat
       const { poolLetter, teamA, teamB, round } = roundMatches[i];
       const courtNumber = (i % numCourts) + 1;
 
-      const matchId = `${division}_${poolLetter}_${teamA.teamName}_vs_${teamB.teamName}`
-        .replace(/[^a-zA-Z0-9]/g, "_");
-      await setDoc(doc(db, "matches", matchId), {
-        division: division,
-        poolName: poolLetter,
-        round: round,
-        teamA: teamA.teamName,
-        teamB: teamB.teamName,
-        scoreA: null,
-        scoreB: null,
-        completed: false,
-        court: courtNumber
-      });
+      const [sortedA, sortedB] = [teamA.teamName, teamB.teamName].sort();
+const matchId = `${division}_${poolLetter}_${sortedA}_vs_${sortedB}`
+  .replace(/[^a-zA-Z0-9]/g, "_");
+await setDoc(doc(db, "matches", matchId), {
+  division: division,
+  poolName: poolLetter,
+  round: round,
+  teamA: sortedA,
+  teamB: sortedB,
+  scoreA: null,
+  scoreB: null,
+  completed: false,
+  court: courtNumber
+});
+        
     }
   }
 }
 
-      async function saveMatchScore(division, poolName, teamA, teamB, scoreA, scoreB) {
-        if (!division || !poolName || !teamA || !teamB) {
-          console.warn("Skipped saveMatchScore: missing field(s)", {division, poolName, teamA, teamB});
-          return;
-        }
-        const q = query(
-          collection(db, "matches"),
-          where("division", "==", division),
-          where("poolName", "==", poolName),
-          where("teamA", "==", teamA),
-          where("teamB", "==", teamB)
-        );
-        const snapshot = await getDocs(q);
-        if (!snapshot.empty) {
-          const matchDoc = snapshot.docs[0];
-          await updateDoc(matchDoc.ref, {scoreA, scoreB, completed: true});
-        }
-      }
+      async function saveMatchScore(matchId, scoreA, scoreB) {
+  if (!matchId) {
+    console.warn("Skipped saveMatchScore: missing matchId");
+    return;
+  }
+  await updateDoc(doc(db, "matches", matchId), { scoreA, scoreB, completed: true });
+}
       
 window.editMatchScore = function(matchId) {
   const display = document.getElementById(`scoreDisplay_${matchId}`);
@@ -418,7 +409,7 @@ window.submitMatchScore = async function(matchId) {
   const scoreA = Number(document.getElementById(`scoreA_${matchId}`).value);
   const scoreB = Number(document.getElementById(`scoreB_${matchId}`).value);
 
-  await saveMatchScore(row.dataset.division, row.dataset.pool, row.dataset.teamA, row.dataset.teamB, scoreA, scoreB);
+  await saveMatchScore(matchId, scoreA, scoreB);
 
   document.getElementById(`scoreCell_${matchId}`).innerHTML =
     `<span id="scoreDisplay_${matchId}">${scoreA} - ${scoreB}</span> <button onclick="editMatchScore('${matchId}')">Edit</button>`;
@@ -567,26 +558,27 @@ Object.keys(matchesByRound).sort((x, y) => x - y).forEach(roundNum => {
         html += `<button class="printResultsBtn" data-division="${divisionLabel}">Print Results</button>`;
         html += `<div id="${elementId}-advancing" style="display:none"></div>`;
         poolsOfNames.forEach((poolNames, i) => {
-          const poolLetter = String.fromCharCode(65 + i);
-          const poolId = `${elementId}-pool-${poolLetter}`;
-          html += `<p><strong>Pool ${poolLetter}:</strong> ${poolNames.join(", ")}</p>`;
-          html += `<div id="${poolId}-matches">`;
-          html += `<ul>`;
-          for (let a = 0; a < poolNames.length; a++) {
-            for (let b = a + 1; b < poolNames.length; b++) {
-              const matchId = `${divisionLabel}_${poolLetter}_${poolNames[a]}_vs_${poolNames[b]}`.replace(/[^a-zA-Z0-9]/g, "_");
-              const existing = savedScores[matchId];
-              const scoreAVal = existing ? existing.scoreA : "";
-              const scoreBVal = existing ? existing.scoreB : "";
-              html += `<li>`;
-              html += `${poolNames[a]} vs. ${poolNames[b]} `;
-              html += `<input type="number" class="scoreA" data-match="${matchId}" style="width:40px" placeholder="0" value="${scoreAVal}">`;
-              html += ` - `;
-              html += `<input type="number" class="scoreB" data-match="${matchId}" style="width:40px" placeholder="0" value="${scoreBVal}">`;
-              html += `<button class="saveScoreBtn" data-match="${matchId}" data-division="${divisionLabel}" data-pool="${poolLetter}" data-teama="${poolNames[a]}" data-teamb="${poolNames[b]}">Save</button>`;
-              html += `</li>`;
-            }
-          }
+  const poolLetter = String.fromCharCode(65 + i);
+  const poolId = `${elementId}-pool-${poolLetter}`;
+  html += `<p><strong>Pool ${poolLetter}:</strong> ${poolNames.join(", ")}</p>`;
+  html += `<div id="${poolId}-matches">`;
+  html += `<ul>`;
+  for (let a = 0; a < poolNames.length; a++) {
+    for (let b = a + 1; b < poolNames.length; b++) {
+      const [sortedA, sortedB] = [poolNames[a], poolNames[b]].sort();
+      const matchId = `${divisionLabel}_${poolLetter}_${sortedA}_vs_${sortedB}`.replace(/[^a-zA-Z0-9]/g, "_");
+      const existing = savedScores[matchId];
+      const scoreAVal = existing ? existing.scoreA : "";
+      const scoreBVal = existing ? existing.scoreB : "";
+      html += `<li>`;
+      html += `${poolNames[a]} vs. ${poolNames[b]} `;
+      html += `<input type="number" class="scoreA" data-match="${matchId}" style="width:40px" placeholder="0" value="${scoreAVal}">`;
+      html += ` - `;
+      html += `<input type="number" class="scoreB" data-match="${matchId}" style="width:40px" placeholder="0" value="${scoreBVal}">`;
+      html += `<button class="saveScoreBtn" data-match="${matchId}" data-division="${divisionLabel}" data-pool="${poolLetter}" data-teama="${poolNames[a]}" data-teamb="${poolNames[b]}">Save</button>`;
+      html += `</li>`;
+    }
+  }
 
           html += `</ul>`;
           html += `<button class="showStandingsBtn" data-division="${divisionLabel}" data-pool="${poolLetter}" data-pool-id="${poolId}" data-teams='${JSON.stringify(poolNames)}'>Show Standings</button>`;
