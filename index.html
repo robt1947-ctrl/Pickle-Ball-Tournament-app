@@ -193,7 +193,7 @@ ${role.toLowerCase() === "admin" ? `
   <input type="number" id="numCourtsInput" min="1" max="20" placeholder="4" />
   <button id="saveCourtsBtn">Save Court Count</button>
 ` : ""}
-${role.toLowerCase() === "admin" ? `<button id="testPoolsBtn">Test Pool Calculation</button>` : ""}
+${role.toLowerCase() === "admin" ? `<button id="testPoolsBtn">Test Pool Calculation</button> <button id="checkCompletionBtn">Check Completion</button>` : ""}
  <select id="minGames">
   <option value="3">Minimum 3 games</option>
   <option value="4">Minimum 4 games</option>
@@ -731,8 +731,36 @@ Object.keys(matchesByRound).sort((x, y) => x - y).forEach(roundNum => {
     await renderPools("poolResultsIntermediate", "Intermediate", poolNames.flat().length, poolNames);
   }
 }
-window.refreshAllPools = refreshAllPools;
+window.window.refreshAllPools = refreshAllPools;
 refreshAllPools();
+
+async function checkPoolCompletion(divisionLabel, poolsOfNames) {
+  const savedScores = await getMatchScores(divisionLabel);
+  const results = [];
+
+  poolsOfNames.forEach((poolNames, i) => {
+    const poolLetter = String.fromCharCode(65 + i);
+    let allComplete = true;
+
+    for (let a = 0; a < poolNames.length; a++) {
+      for (let b = a + 1; b < poolNames.length; b++) {
+        const matchId = `${divisionLabel}_${poolLetter}_${poolNames[a]}_vs_${poolNames[b]}`.replace(/[^a-zA-Z0-9_]/g, "_");
+        const match = savedScores[matchId];
+        if (!match || match.completed !== true) {
+          allComplete = false;
+        }
+      }
+    }
+
+    console.log(`Pool ${poolLetter} (${divisionLabel}) complete: ${allComplete}`);
+    results.push({ poolLetter, complete: allComplete });
+  });
+
+  const allPoolsComplete = results.every(r => r.complete);
+  console.log(`All pools complete for ${divisionLabel}: ${allPoolsComplete}`);
+  return results;
+}
+window.checkPoolCompletion = checkPoolCompletion;
         
       if (document.getElementById("testPoolsBtn")) {
       document.getElementById("testPoolsBtn").addEventListener("click", () => {
@@ -741,8 +769,23 @@ refreshAllPools();
         console.log("11 teams, 4 min games:", calculatePools(11, 4));
         console.log("15 teams, 3 min games:", calculatePools(15, 3));
         console.log("15 teams, 4 min games:", calculatePools(15, 4));
-      });
-      }
+        });
+}
+
+if (document.getElementById("checkCompletionBtn")) {
+  document.getElementById("checkCompletionBtn").addEventListener("click", async () => {
+    const savedBeginners = await loadPoolsFromFirestore("Beginners");
+    if (savedBeginners) {
+      const poolNames = savedBeginners.map(p => p.teams);
+      await checkPoolCompletion("Beginners", poolNames);
+    }
+    const savedIntermediate = await loadPoolsFromFirestore("Intermediate");
+    if (savedIntermediate) {
+      const poolNames = savedIntermediate.map(p => p.teams);
+      await checkPoolCompletion("Intermediate", poolNames);
+    }
+  });
+}
       if (role.toLowerCase() === "admin") {
         document.getElementById("resetBtn").addEventListener("click", async () => {
           const confirmReset = confirm("Are you sure you want to delete ALL teams? This cannot be undone.");
