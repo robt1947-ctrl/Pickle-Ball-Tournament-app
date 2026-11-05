@@ -612,7 +612,7 @@ Object.keys(matchesByRound).sort((x, y) => x - y).forEach(roundNum => {
               alert("Invalid score. A team must win by at least 2 points, and the winning score must be 11 or higher.");
               return;
             }
-            await saveMatchScore(division, poolName, teamA, teamB, scoreA, scoreB);
+           await saveMatchScore(matchId, scoreA, scoreB);
             alert("Score saved!");
           });
         });
