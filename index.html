@@ -630,7 +630,8 @@ html += `</li>`; Screen
   if (e.target.classList.contains("editScoreBtn")) {
     const matchId = e.target.dataset.match;
     const cell = document.querySelector(`#scoreCell_${matchId}`);
-    cell.innerHTML = renderScoreCell(matchId, null);
+    const existing = { scoreA: e.target.dataset.scorea, scoreB: e.target.dataset.scoreb };
+    cell.innerHTML = renderScoreCell(matchId, existing, true);
   }
 });
         document.querySelectorAll(`#${elementId} .scoreA, #${elementId} .scoreB`).forEach(input => {
