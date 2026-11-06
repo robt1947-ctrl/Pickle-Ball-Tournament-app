@@ -397,7 +397,7 @@ await setDoc(doc(db, "matches", matchId), {
   await updateDoc(doc(db, "matches", matchId), { scoreA, scoreB, completed: true });
 }
 function renderScoreCell(matchId, existing, editing = false) {
-  const hasScore =
+  const hasScore = Screen
     existing &&
     existing.scoreA !== null && existing.scoreA !== undefined && existing.scoreA !== "" &&
     existing.scoreB !== null && existing.scoreB !== undefined && existing.scoreB !== "" &&
