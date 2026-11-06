@@ -534,18 +534,20 @@ Object.keys(matchesByRound).sort((x, y) => x - y).forEach(roundNum => {
 }
 
       async function getAdvancingTeams(division, poolsOfNames) {
-        const results = [];
-        for (let i = 0; i < poolsOfNames.length; i++) {
-          const poolLetter = String.fromCharCode(65 + i);
-          const standings = await calculateStandings(division, poolLetter, poolsOfNames[i]);
-          results.push({
-            pool: poolLetter,
-            first: standings[0] ? standings[0].team : "-",
-            second: standings[1] ? standings[1].team : "-"
-          });
-        }
-        return results;
-      }
+  const results = [];
+  for (let i = 0; i < poolsOfNames.length; i++) {
+    const poolLetter = String.fromCharCode(65 + i);
+    const standings = await calculateStandings(division, poolLetter, poolsOfNames[i]);
+    results.push({
+      pool: poolLetter,
+      first: standings[0] ? standings[0].team : "-",
+      second: standings[1] ? standings[1].team : "-",
+      firstStats: standings[0] || null,
+      secondStats: standings[1] || null
+    });
+  }
+  return results;
+}
 
       async function getMatchScores(division) {
   if (!division) {console.warn("Skipped getMatchScores: division is undefined"); return {};}
