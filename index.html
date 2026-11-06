@@ -396,19 +396,21 @@ await setDoc(doc(db, "matches", matchId), {
   }
   await updateDoc(doc(db, "matches", matchId), { scoreA, scoreB, completed: true });
 }
-function renderScoreCell(matchId, existing) {
+function renderScoreCell(matchId, existing, editing = false) {
   const hasScore =
     existing &&
     existing.scoreA !== null && existing.scoreA !== undefined && existing.scoreA !== "" &&
     existing.scoreB !== null && existing.scoreB !== undefined && existing.scoreB !== "" &&
     !(Number(existing.scoreA) === 0 && Number(existing.scoreB) === 0);
 
-  if (hasScore) {
-    return `${existing.scoreA} - ${existing.scoreB} <button class="editScoreBtn" data-match="${matchId}">Edit</button>`;
+  if (hasScore && !editing) {
+    return `${existing.scoreA} - ${existing.scoreB} <button class="editScoreBtn" data-match="${matchId}" data-scorea="${existing.scoreA}" data-scoreb="${existing.scoreB}">Edit</button>`;
   } else {
-    return `<input type="number" class="scoreA" data-match="${matchId}" style="width:40px" placeholder="0">` +
+    const valA = hasScore ? existing.scoreA : "";
+    const valB = hasScore ? existing.scoreB : "";
+    return `<input type="number" class="scoreA" data-match="${matchId}" style="width:40px" placeholder="0" value="${valA}">` +
       ` - ` +
-      `<input type="number" class="scoreB" data-match="${matchId}" style="width:40px" placeholder="0">` +
+      `<input type="number" class="scoreB" data-match="${matchId}" style="width:40px" placeholder="0" value="${valB}">` +
       `<button class="saveScoreBtn" data-match="${matchId}">Save</button>`;
   }
 }
