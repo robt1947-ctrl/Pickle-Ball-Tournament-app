@@ -396,7 +396,18 @@ await setDoc(doc(db, "matches", matchId), {
   }
   await updateDoc(doc(db, "matches", matchId), { scoreA, scoreB, completed: true });
 }
-      
+function renderScoreCell(matchId, existing) {
+  if (existing) {
+    return `${existing.scoreA} - ${existing.scoreB} <button class="editScoreBtn" data-match="${matchId}">Edit</button>`;
+  } else {
+    return `<input type="number" class="scoreA" data-match="${matchId}" style="width:40px" placeholder="0">` +
+      ` - ` +
+      `<input type="number" class="scoreB" data-match="${matchId}" style="width:40px" placeholder="0">` +
+      `<button class="saveScoreBtn" data-match="${matchId}">Save</button>`;
+  }
+} 
+
+
 window.editMatchScore = function(matchId) {
   const display = document.getElementById(`scoreDisplay_${matchId}`);
   const [scoreA, scoreB] = display.textContent.split(" - ");
@@ -571,12 +582,9 @@ Object.keys(matchesByRound).sort((x, y) => x - y).forEach(roundNum => {
       const scoreAVal = existing ? existing.scoreA : "";
       const scoreBVal = existing ? existing.scoreB : "";
       html += `<li>`;
-      html += `${poolNames[a]} vs. ${poolNames[b]} `;
-      html += `<input type="number" class="scoreA" data-match="${matchId}" style="width:40px" placeholder="0" value="${scoreAVal}">`;
-      html += ` - `;
-      html += `<input type="number" class="scoreB" data-match="${matchId}" style="width:40px" placeholder="0" value="${scoreBVal}">`;
-      html += `<button class="saveScoreBtn" data-match="${matchId}" data-division="${divisionLabel}" data-pool="${poolLetter}" data-teama="${poolNames[a]}" data-teamb="${poolNames[b]}">Save</button>`;
-      html += `</li>`;
+html += `${poolNames[a]} vs. ${poolNames[b]} `;
+html += `<span id="scoreCell_${matchId}">${renderScoreCell(matchId, existing)}</span>`;
+html += `</li>`; Screen
     }
   }
 
@@ -593,29 +601,32 @@ Object.keys(matchesByRound).sort((x, y) => x - y).forEach(roundNum => {
           if (winner - loser < 2) return false;
           return true;
         }
-        document.querySelectorAll(`#${elementId} .saveScoreBtn`).forEach(btn => {
-          btn.addEventListener("click", async () => {
-            const matchId = btn.dataset.match;
-            const division = btn.dataset.division;
-            const poolName = btn.dataset.pool;
-            const teamA = btn.dataset.teama;
-            const teamB = btn.dataset.teamb;
-            const scoreAInput = document.querySelector(`#${elementId} .scoreA[data-match="${matchId}"]`);
-            const scoreBInput = document.querySelector(`#${elementId} .scoreB[data-match="${matchId}"]`);
-            const scoreA = parseInt(scoreAInput.value);
-            const scoreB = parseInt(scoreBInput.value);
-            if (isNaN(scoreA) || isNaN(scoreB)) {
-              alert("Please enter both scores before saving.");
-              return;
-            }
-            if (!isValidPickleballScore(scoreA, scoreB)) {
-              alert("Invalid score. A team must win by at least 2 points, and the winning score must be 11 or higher.");
-              return;
-            }
-           await saveMatchScore(matchId, scoreA, scoreB);
-            alert("Score saved!");
-          });
-        });
+        document.querySelector(`#${elementId}`).addEventListener("click", async (e) => {
+  if (e.target.classList.contains("saveScoreBtn")) {
+    const matchId = e.target.dataset.match;
+    const cell = document.querySelector(`#scoreCell_${matchId}`);
+    const scoreAInput = cell.querySelector(".scoreA");
+    const scoreBInput = cell.querySelector(".scoreB");
+    const scoreA = parseInt(scoreAInput.value);
+    const scoreB = parseInt(scoreBInput.value);
+    if (isNaN(scoreA) || isNaN(scoreB)) {
+      alert("Please enter both scores before saving.");
+      return;
+    }
+    if (!isValidPickleballScore(scoreA, scoreB)) {
+      alert("Invalid score. A team must win by at least 2 points, and the winning score must be 11 or higher.");
+      return;
+    }
+    await saveMatchScore(matchId, scoreA, scoreB);
+    cell.innerHTML = renderScoreCell(matchId, { scoreA, scoreB });
+  }
+
+  if (e.target.classList.contains("editScoreBtn")) {
+    const matchId = e.target.dataset.match;
+    const cell = document.querySelector(`#scoreCell_${matchId}`);
+    cell.innerHTML = renderScoreCell(matchId, null);
+  }
+});
         document.querySelectorAll(`#${elementId} .scoreA, #${elementId} .scoreB`).forEach(input => {
           input.addEventListener("input", () => {
             const matchId = input.dataset.match;
@@ -735,14 +746,16 @@ async function checkPoolCompletion(divisionLabel, poolsOfNames) {
     let allComplete = true;
 
     for (let a = 0; a < poolNames.length; a++) {
-      for (let b = a + 1; b < poolNames.length; b++) {
-        const matchId = `${divisionLabel}_${poolLetter}_${poolNames[a]}_vs_${poolNames[b]}`.replace(/[^a-zA-Z0-9_]/g, "_");
-        const match = savedScores[matchId];
-        if (!match || match.completed !== true) {
-          allComplete = false;
-        }
-      }
-    }
+  for (let b = a + 1; b < poolNames.length; b++) {
+    const [sortedA, sortedB] = [poolNames[a], poolNames[b]].sort();
+    const matchId = `${divisionLabel}_${poolLetter}_${sortedA}_vs_${sortedB}`.replace(/[^a-zA-Z0-9]/g, "_");
+    const existing = savedScores[matchId];
+    html += `<li>`;
+    html += `${poolNames[a]} vs. ${poolNames[b]} `;
+    html += `<span id="scoreCell_${matchId}">${renderScoreCell(matchId, existing)}</span>`;
+    html += `</li>`;
+  }
+}
 
     console.log(`Pool ${poolLetter} (${divisionLabel}) complete: ${allComplete}`);
     results.push({ poolLetter, complete: allComplete });
