@@ -397,7 +397,13 @@ await setDoc(doc(db, "matches", matchId), {
   await updateDoc(doc(db, "matches", matchId), { scoreA, scoreB, completed: true });
 }
 function renderScoreCell(matchId, existing) {
-  if (existing) {
+  const hasScore =
+    existing &&
+    existing.scoreA !== null && existing.scoreA !== undefined && existing.scoreA !== "" &&
+    existing.scoreB !== null && existing.scoreB !== undefined && existing.scoreB !== "" &&
+    !(Number(existing.scoreA) === 0 && Number(existing.scoreB) === 0);
+
+  if (hasScore) {
     return `${existing.scoreA} - ${existing.scoreB} <button class="editScoreBtn" data-match="${matchId}">Edit</button>`;
   } else {
     return `<input type="number" class="scoreA" data-match="${matchId}" style="width:40px" placeholder="0">` +
@@ -405,7 +411,7 @@ function renderScoreCell(matchId, existing) {
       `<input type="number" class="scoreB" data-match="${matchId}" style="width:40px" placeholder="0">` +
       `<button class="saveScoreBtn" data-match="${matchId}">Save</button>`;
   }
-} 
+}
 
 
 window.editMatchScore = function(matchId) {
