@@ -546,7 +546,46 @@ Object.keys(matchesByRound).sort((x, y) => x - y).forEach(roundNum => {
       secondStats: standings[1] || null
     });
   }
+
+
   return results;
+}
+
+function rankAdvancingTeams(results) {
+  const entries = [];
+  results.forEach(r => {
+    if (r.firstStats) entries.push({ ...r.firstStats, pool: r.pool, place: 1 });
+    if (r.secondStats) entries.push({ ...r.secondStats, pool: r.pool, place: 2 });
+  });
+
+  entries.forEach(e => {
+    const gp = e.gamesPlayed || 0;
+    e.winPct = gp > 0 ? e.wins / gp : 0;
+    e.avgDiff = gp > 0 ? e.diff / gp : 0;
+    e.avgPoints = gp > 0 ? e.pointsFor / gp : 0;
+    e.crossTie = false;
+  });
+
+  entries.sort((a, b) => {
+    if (a.place !== b.place) return a.place - b.place;
+    if (b.winPct !== a.winPct) return b.winPct - a.winPct;
+    if (b.avgDiff !== a.avgDiff) return b.avgDiff - a.avgDiff;
+    return b.avgPoints - a.avgPoints;
+  });
+
+  for (let i = 0; i < entries.length; i++) {
+    const a = entries[i];
+    const b = entries[i + 1];
+    a.seed = i + 1;
+    if (b && a.place === b.place &&
+        Math.abs(a.winPct - b.winPct) < 1e-9 &&
+        Math.abs(a.avgDiff - b.avgDiff) < 1e-9 &&
+        Math.abs(a.avgPoints - b.avgPoints) < 1e-9) {
+      a.crossTie = true;
+      b.crossTie = true;
+    }
+  }
+  return entries;
 }
 
       async function getMatchScores(division) {
@@ -698,14 +737,24 @@ html += `</li>`;
             advancingDiv.style.display = "none";
             return;
           }
-          const results = await getAdvancingTeams(divisionLabel, poolsOfNames);
-          let advancingHtml = `<table border="1" cellpadding="5"><tr><th>Pool</th><th>1st Place</th><th>2nd Place</th></tr>`;
-          results.forEach(r => {
-            advancingHtml += `<tr><td>${r.pool}</td><td>${r.first}</td><td>${r.second}</td></tr>`;
-          });
-          advancingHtml += `</table>`;
-          advancingDiv.innerHTML = advancingHtml;
-          advancingDiv.style.display = "block";
+                const results = await getAdvancingTeams(divisionLabel, poolsOfNames);
+      let advancingHtml = `<table border="1" cellpadding="5"><tr><th>Pool</th><th>1st Place</th><th>2nd Place</th></tr>`;
+      results.forEach(r => {
+        advancingHtml += `<tr><td>${r.pool}</td><td>${r.first}</td><td>${r.second}</td></tr>`;
+      });
+      advancingHtml += `</table>`;
+
+      const ranked = rankAdvancingTeams(results);
+      advancingHtml += `<h4>Seeding</h4>`;
+      advancingHtml += `<table border="1" cellpadding="5"><tr><th>Seed</th><th>Team</th><th>Pool</th><th>Place</th><th>Record</th><th>Win %</th><th>Avg Diff</th><th>Avg Pts</th><th>Note</th></tr>`;
+      ranked.forEach(e => {
+        const note = (e.crossTie || e.tied) ? "Tie - playoff to 7, win by 2" : "";
+        const avgDiffText = (e.avgDiff > 0 ? "+" : "") + e.avgDiff.toFixed(1);
+        advancingHtml += `<tr><td>${e.seed}</td><td>${e.team}</td><td>${e.pool}</td><td>${e.place}</td><td>${e.wins}-${e.losses}</td><td>${(e.winPct * 100).toFixed(0)}%</td><td>${avgDiffText}</td><td>${e.avgPoints.toFixed(1)}</td><td>${note}</td></tr>`;
+      });
+      advancingHtml += `</table>`;
+      advancingDiv.innerHTML = advancingHtml;
+      advancingDiv.style.display = "block";
         });
 
         document.querySelector(`#${elementId} .downloadCsvBtn`).addEventListener("click", async () => {
