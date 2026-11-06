@@ -597,7 +597,7 @@ Object.keys(matchesByRound).sort((x, y) => x - y).forEach(roundNum => {
       const scoreAVal = existing ? existing.scoreA : "";
       const scoreBVal = existing ? existing.scoreB : "";
       html += `<li>`;
-html += `${poolNames[a]} vs. ${poolNames[b]} `;
+html += `${sortedA} vs. ${sortedB} `;
 html += `<span id="scoreCell_${matchId}">${renderScoreCell(matchId, existing)}</span>`;
 html += `</li>`;
     }
