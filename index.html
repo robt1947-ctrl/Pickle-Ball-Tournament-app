@@ -483,48 +483,55 @@ Object.keys(matchesByRound).sort((x, y) => x - y).forEach(roundNum => {
       }
 
       async function calculateStandings(division, poolLetter, teamNames) {
-        if (!division || !poolLetter) {
-          console.warn("Skipped calculateStandings: missing field(s)", {division, poolLetter});
-          return [];
-        }
-        const q = query(
-          collection(db, "matches"),
-          where("division", "==", division),
-          where("poolName", "==", poolLetter)
-        );
-        const snapshot = await getDocs(q);
-        const matches = snapshot.docs.map(d => d.data());
-        const stats = {};
-        teamNames.forEach(name => {
-          stats[name] = {team: name, wins: 0, losses: 0, pointsFor: 0, pointsAgainst: 0, diff: 0};
-        });
+  if (!division || !poolLetter) {
+    console.warn("Skipped calculateStandings: missing field(s)", {division, poolLetter});
+    return [];
+  }
+  const q = query(
+    collection(db, "matches"),
+    where("division", "==", division),
+    where("poolName", "==", poolLetter)
+  );
+  const snapshot = await getDocs(q);
+  const matches = snapshot.docs.map(d => d.data());
+  const stats = {};
+  teamNames.forEach(name => {
+    stats[name] = {team: name, wins: 0, losses: 0, gamesPlayed: 0, pointsFor: 0, pointsAgainst: 0, diff: 0, tied: false};
+  });
 
-        matches.forEach(m => {
-          if (!m.completed) return;
-          stats[m.teamA].pointsFor += m.scoreA;
-          stats[m.teamA].pointsAgainst += m.scoreB;
-          stats[m.teamB].pointsFor += m.scoreB;
-          stats[m.teamB].pointsAgainst += m.scoreA;
-          if (m.scoreA > m.scoreB) {stats[m.teamA].wins++; stats[m.teamB].losses++;}
-          else if (m.scoreB > m.scoreA) {stats[m.teamB].wins++; stats[m.teamA].losses++;}
-        });
+  matches.forEach(m => {
+    if (!m.completed) return;
+    if (!stats[m.teamA] || !stats[m.teamB]) {
+      console.warn("calculateStandings: match team not in pool, skipped", m.teamA, m.teamB);
+      return;
+    }
+    const a = Number(m.scoreA) || 0;
+    const b = Number(m.scoreB) || 0;
+    stats[m.teamA].gamesPlayed++;
+    stats[m.teamB].gamesPlayed++;
+    stats[m.teamA].pointsFor += a;
+    stats[m.teamA].pointsAgainst += b;
+    stats[m.teamB].pointsFor += b;
+    stats[m.teamB].pointsAgainst += a;
+    if (a > b) {stats[m.teamA].wins++; stats[m.teamB].losses++;}
+    else if (b > a) {stats[m.teamB].wins++; stats[m.teamA].losses++;}
+  });
 
-        Object.values(stats).forEach(s => s.diff = s.pointsFor - s.pointsAgainst);
+  Object.values(stats).forEach(s => s.diff = s.pointsFor - s.pointsAgainst);
 
-        return Object.values(stats).sort((a, b) => {
-          if (b.wins !== a.wins) return b.wins - a.wins;
-          if (b.diff !== a.diff) return b.diff - a.diff;
-          const headToHead = matches.find(m =>
-            (m.teamA === a.team && m.teamB === b.team) || (m.teamA === b.team && m.teamB === a.team)
-          );
-          if (headToHead && headToHead.completed) {
-            const aScore = headToHead.teamA === a.team ? headToHead.scoreA : headToHead.scoreB;
-            const bScore = headToHead.teamA === b.team ? headToHead.scoreA : headToHead.scoreB;
-            return bScore - aScore;
-          }
-          return 0;
-        });
-      }
+  // Rank by wins, then point differential, then total points scored
+  const sorted = Object.values(stats).sort((x, y) =>
+    (y.wins - x.wins) || (y.diff - x.diff) || (y.pointsFor - x.pointsFor)
+  );
+
+  // Flag teams still tied on all three measures (a playoff game is needed)
+  const sameAs = (s, o) => o && o.wins === s.wins && o.diff === s.diff && o.pointsFor === s.pointsFor;
+  sorted.forEach((s, i) => {
+    s.tied = !!(sameAs(s, sorted[i - 1]) || sameAs(s, sorted[i + 1]));
+  });
+
+  return sorted;
+}
 
       async function getAdvancingTeams(division, poolsOfNames) {
         const results = [];
@@ -755,16 +762,13 @@ async function checkPoolCompletion(divisionLabel, poolsOfNames) {
     let allComplete = true;
 
     for (let a = 0; a < poolNames.length; a++) {
-  for (let b = a + 1; b < poolNames.length; b++) {
-    const [sortedA, sortedB] = [poolNames[a], poolNames[b]].sort();
-    const matchId = `${divisionLabel}_${poolLetter}_${sortedA}_vs_${sortedB}`.replace(/[^a-zA-Z0-9]/g, "_");
-    const existing = savedScores[matchId];
-    html += `<li>`;
-    html += `${poolNames[a]} vs. ${poolNames[b]} `;
-    html += `<span id="scoreCell_${matchId}">${renderScoreCell(matchId, existing)}</span>`;
-    html += `</li>`;
-  }
-}
+      for (let b = a + 1; b < poolNames.length; b++) {
+        const [sortedA, sortedB] = [poolNames[a], poolNames[b]].sort();
+        const matchId = `${divisionLabel}_${poolLetter}_${sortedA}_vs_${sortedB}`.replace(/[^a-zA-Z0-9]/g, "_");
+        const existing = savedScores[matchId];
+        if (!existing || !existing.completed) allComplete = false;
+      }
+    }
 
     console.log(`Pool ${poolLetter} (${divisionLabel}) complete: ${allComplete}`);
     results.push({ poolLetter, complete: allComplete });
