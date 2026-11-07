@@ -232,6 +232,12 @@ ${role.toLowerCase() === "admin" ? `<button id="testPoolsBtn">Test Pool Calculat
         const division = document.getElementById("division").value;
 
         if (teamName && player1 && player2) {
+          const maxTeamsPerDivision = 15;
+const divisionTeamsSnap = await getDocs(query(collection(db, "teams"), where("division", "==", division)));
+if (divisionTeamsSnap.size >= maxTeamsPerDivision) {
+  alert("The " + division + " division is full. Each division is limited to " + maxTeamsPerDivision + " teams.");
+  return;
+}
           await addDoc(collection(db, "teams"), {teamName, player1, player2, division});
           document.getElementById("teamName").value = "";
           document.getElementById("player1").value = "";
