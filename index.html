@@ -593,6 +593,38 @@ function rankAdvancingTeams(results) {
   }
   return entries;
 }
+function buildBracketPairings(entries) {
+  if (!entries || entries.length < 4) {
+    return { ok: false, reason: "Fewer than four advancing teams." };
+  }
+  if (entries.slice(0, 5).some(e => e.crossTie)) {
+    return { ok: false, reason: "A tie affects the top four or the seed 4/5 cutoff." };
+  }
+
+  const top = entries.slice(0, 4);
+  const samePool = (pair) => pair[0].pool === pair[1].pool;
+
+  let semi1 = [top[0], top[3]];
+  let semi2 = [top[1], top[2]];
+
+  if (samePool(semi1) || samePool(semi2)) {
+    const alt1 = [top[0], top[2]];
+    const alt2 = [top[1], top[3]];
+    if (!samePool(alt1) && !samePool(alt2)) {
+      semi1 = alt1;
+      semi2 = alt2;
+    }
+  }
+
+  return {
+    ok: true,
+    semifinals: [
+      { slot: 1, teamA: semi1[0], teamB: semi1[1] },
+      { slot: 2, teamA: semi2[0], teamB: semi2[1] }
+    ]
+  };
+}
+
 
       async function getMatchScores(division) {
   if (!division) {console.warn("Skipped getMatchScores: division is undefined"); return {};}
