@@ -565,7 +565,7 @@ function rankAdvancingTeams(results) {
   });
 
   entries.forEach(e => {
-    const gp = e.gamesPlayed || 0;
+    const gp = e.gamesPlayed || ((e.wins || 0) + (e.losses || 0));
     e.winPct = gp > 0 ? e.wins / gp : 0;
     e.avgDiff = gp > 0 ? e.diff / gp : 0;
     e.avgPoints = gp > 0 ? e.pointsFor / gp : 0;
