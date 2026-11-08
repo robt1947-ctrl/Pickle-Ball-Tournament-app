@@ -655,7 +655,7 @@ async function saveBracketScore(matchId, scoreA, scoreB) {
   if (!matchId) return;
   await updateDoc(doc(db, "bracketMatches", matchId), { scoreA, scoreB, completed: true });
 }
-      
+
 async function getMatchScores(division) {
   if (!division) {console.warn("Skipped getMatchScores: division is undefined"); return {};}
   const q = query(collection(db, "matches"), where("division", "==", division));
@@ -820,8 +820,35 @@ html += `</li>`;
         const avgDiffText = (e.avgDiff > 0 ? "+" : "") + e.avgDiff.toFixed(1);
         advancingHtml += `<tr><td>${e.seed}</td><td>${e.team}</td><td>${e.pool}</td><td>${e.place}</td><td>${e.wins}-${e.losses}</td><td>${(e.winPct * 100).toFixed(0)}%</td><td>${avgDiffText}</td><td>${e.avgPoints.toFixed(1)}</td><td>${note}</td></tr>`;
       });
-      advancingHtml += `</table>`;
+      advancingHtml += `</table>`;      
+      const canCreateSemis = typeof role !== "undefined" && String(role).toLowerCase() === "admin";
+      if (canCreateSemis) {
+        advancingHtml += `<br><button class="createSemisBtn">Create Semifinals</button><div class="semisMessage"></div>`;
+      }
       advancingDiv.innerHTML = advancingHtml;
+      if (canCreateSemis) {
+        advancingDiv.querySelector(".createSemisBtn").addEventListener("click", async () => {
+          const msgDiv = advancingDiv.querySelector(".semisMessage");
+          msgDiv.style.whiteSpace = "pre-line";
+          const pairings = buildBracketPairings(ranked);
+          if (!pairings.ok) {
+            msgDiv.textContent = "Cannot create semifinals: " + pairings.reason;
+            return;
+          }
+          try {
+            const existing = await getDoc(doc(db, "bracketMatches", bracketMatchId(divisionLabel, 1)));
+            if (existing.exists()) {
+              const overwrite = confirm("Semifinals already exist for this division. Creating them again will erase any saved semifinal scores. Continue?");
+              if (!overwrite) return;
+            }
+            await saveBracketToFirestore(divisionLabel, pairings);
+            msgDiv.textContent = "Semifinals saved:\n" + pairings.semifinals.map(s => "Semifinal " + s.slot + ": " + s.teamA.team + " vs " + s.teamB.team).join("\n");
+          } catch (err) {
+            console.error("Create semifinals failed:", err);
+            msgDiv.textContent = "Could not save semifinals. Check the browser console for details.";
+          }
+        });
+      }
       advancingDiv.style.display = "block";
         });
 
