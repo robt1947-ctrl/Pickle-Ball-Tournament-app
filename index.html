@@ -626,7 +626,37 @@ function buildBracketPairings(entries) {
 }
 
 
-      async function getMatchScores(division) {
+function bracketMatchId(division, slot) {
+  return String(division).replace(/[^a-zA-Z0-9]/g, "_") + "_semi" + slot;
+}
+
+async function saveBracketToFirestore(division, pairings) {
+  if (!division || !pairings || !pairings.ok) return false;
+  for (const semi of pairings.semifinals) {
+    await setDoc(doc(db, "bracketMatches", bracketMatchId(division, semi.slot)), {
+      division: division,
+      round: "semifinal",
+      slot: semi.slot,
+      teamA: semi.teamA.team,
+      teamB: semi.teamB.team,
+      poolA: semi.teamA.pool,
+      poolB: semi.teamB.pool,
+      seedA: semi.teamA.seed,
+      seedB: semi.teamB.seed,
+      scoreA: null,
+      scoreB: null,
+      completed: false
+    });
+  }
+  return true;
+}
+
+async function saveBracketScore(matchId, scoreA, scoreB) {
+  if (!matchId) return;
+  await updateDoc(doc(db, "bracketMatches", matchId), { scoreA, scoreB, completed: true });
+}
+      
+async function getMatchScores(division) {
   if (!division) {console.warn("Skipped getMatchScores: division is undefined"); return {};}
   const q = query(collection(db, "matches"), where("division", "==", division));
   const snapshot = await getDocs(q);
