@@ -94,6 +94,7 @@
       background-color: #EFEFEF;
     }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
 </head>
 
 <body>
@@ -695,9 +696,12 @@ async function getMatchScores(division) {
         const savedScores = await getMatchScores(divisionLabel);
         let html = `<h4>${divisionLabel} (${teamCount} teams)</h4>`;
 
+        
+        
         html += `<button class="viewAdvancingBtn" data-division="${divisionLabel}">View Advancing Teams</button>`;
         html += `<button class="downloadCsvBtn" data-division="${divisionLabel}">Download Results (CSV)</button>`;
         html += `<button class="printResultsBtn" data-division="${divisionLabel}">Print Results</button>`;
+        html += `<button class="downloadXlsxBtn" data-division="${divisionLabel}">Download Excel</button>`;
         html += `<div id="${elementId}-advancing" style="display:none"></div>`;
         poolsOfNames.forEach((poolNames, i) => {
   const poolLetter = String.fromCharCode(65 + i);
@@ -866,7 +870,67 @@ html += `</li>`;
         document.querySelector(`#${elementId} .printResultsBtn`).addEventListener("click", async () => {
           await printResults(divisionLabel, poolsOfNames);
         });
+        
+        document.querySelector(`#${elementId} .downloadXlsxBtn`).addEventListener("click", async () => {
+          await exportResultsToExcel(divisionLabel, poolsOfNames);
+        });
       }
+      async function exportResultsToExcel(divisionLabel, poolsOfNames) {
+  if (typeof ExcelJS === "undefined") {
+    alert("The Excel library did not load. Refresh the page and try again.");
+    return;
+  }
+
+  const savedScores = await getMatchScores(divisionLabel);
+
+  const workbook = new ExcelJS.Workbook();
+  const sheet = workbook.addWorksheet("Pool Matches");
+
+  sheet.columns = [
+    { header: "Pool", key: "pool", width: 8 },
+    { header: "Team A", key: "teamA", width: 28 },
+    { header: "Score A", key: "scoreA", width: 10 },
+    { header: "Team B", key: "teamB", width: 28 },
+    { header: "Score B", key: "scoreB", width: 10 },
+    { header: "Status", key: "status", width: 14 }
+  ];
+  sheet.getRow(1).font = { bold: true };
+
+  poolsOfNames.forEach((poolNames, i) => {
+    const poolLetter = String.fromCharCode(65 + i);
+    for (let a = 0; a < poolNames.length; a++) {
+      for (let b = a + 1; b < poolNames.length; b++) {
+        const [sortedA, sortedB] = [poolNames[a], poolNames[b]].sort();
+        const matchId = `${divisionLabel}_${poolLetter}_${sortedA}_vs_${sortedB}`.replace(/[^a-zA-Z0-9]/g, "_");
+        const existing = savedScores[matchId];
+        const scoreA = existing && existing.scoreA != null ? existing.scoreA : "";
+        const scoreB = existing && existing.scoreB != null ? existing.scoreB : "";
+        const played = scoreA !== "" && scoreB !== "";
+        sheet.addRow({
+          pool: poolLetter,
+          teamA: sortedA,
+          scoreA: scoreA,
+          teamB: sortedB,
+          scoreB: scoreB,
+          status: played ? "Complete" : "Not played"
+        });
+      }
+    }
+  });
+
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+  });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `${divisionLabel.replace(/[^a-zA-Z0-9]/g, "_")}_Results.xlsx`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
       document.getElementById("generateBeginnersBtn").addEventListener("click", async () => {
         const confirmGenerate = confirm("This will create new pools and matches, overwriting any existing ones. It will also delete any saved semifinals for the Beginners division. Continue?");
         if (!confirmGenerate) return;
