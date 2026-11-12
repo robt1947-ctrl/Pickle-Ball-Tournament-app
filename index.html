@@ -656,6 +656,13 @@ async function saveBracketScore(matchId, scoreA, scoreB) {
   await updateDoc(doc(db, "bracketMatches", matchId), { scoreA, scoreB, completed: true });
 }
 
+async function deleteBracketFromFirestore(division) {
+  if (!division) return;
+  for (const slot of [1, 2]) {
+    await deleteDoc(doc(db, "bracketMatches", bracketMatchId(division, slot)));
+  }
+}
+
 async function getMatchScores(division) {
   if (!division) {console.warn("Skipped getMatchScores: division is undefined"); return {};}
   const q = query(collection(db, "matches"), where("division", "==", division));
@@ -861,8 +868,9 @@ html += `</li>`;
         });
       }
       document.getElementById("generateBeginnersBtn").addEventListener("click", async () => {
-        const confirmGenerate = confirm("This will create new pools and matches, overwriting any existing ones. Continue?");
+        const confirmGenerate = confirm("This will create new pools and matches, overwriting any existing ones. It will also delete any saved semifinals for the Beginners division. Continue?");
         if (!confirmGenerate) return;
+        await deleteBracketFromFirestore("Beginners");       
         const minGames = parseInt(document.getElementById("minGames").value);
         const teams = await getTeamsByDivision("Beginners");
         const poolSizes = calculatePools(teams.length, minGames);
@@ -873,8 +881,9 @@ html += `</li>`;
         await renderPools("poolResultsBeginners", "Beginners", teams.length, poolNames);
       });
       document.getElementById("generateIntermediateBtn").addEventListener("click", async () => {
-        const confirmGenerate = confirm("This will create new pools and matches, overwriting any existing ones. Continue?");
+        const confirmGenerate = confirm("This will create new pools and matches, overwriting any existing ones. It will also delete any saved semifinals for the Intermediate division. Continue?");
         if (!confirmGenerate) return;
+        await deleteBracketFromFirestore("Intermediate");
         const minGames = parseInt(document.getElementById("minGames").value);
         const teams = await getTeamsByDivision("Intermediate");
         const poolSizes = calculatePools(teams.length, minGames);
