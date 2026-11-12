@@ -902,7 +902,7 @@ html += `</li>`;
       for (let b = a + 1; b < poolNames.length; b++) {
         const [sortedA, sortedB] = [poolNames[a], poolNames[b]].sort();
         const matchId = `${divisionLabel}_${poolLetter}_${sortedA}_vs_${sortedB}`.replace(/[^a-zA-Z0-9]/g, "_");
-        const existing = savedScores[matchId];
+        const existing = savedScores[matchId] && savedScores[matchId].completed ? savedScores[matchId] : null;
         const scoreA = existing && existing.scoreA != null ? existing.scoreA : "";
         const scoreB = existing && existing.scoreB != null ? existing.scoreB : "";
         const played = scoreA !== "" && scoreB !== "";
