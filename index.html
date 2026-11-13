@@ -918,6 +918,40 @@ html += `</li>`;
     }
   });
 
+    const standingsSheet = workbook.addWorksheet("Standings");
+  standingsSheet.columns = [
+    { header: "Pool", key: "pool", width: 8 },
+    { header: "Rank", key: "rank", width: 8 },
+    { header: "Team", key: "team", width: 28 },
+    { header: "Games Played", key: "gp", width: 14 },
+    { header: "Wins", key: "wins", width: 8 },
+    { header: "Losses", key: "losses", width: 8 },
+    { header: "Points For", key: "pf", width: 12 },
+    { header: "Points Against", key: "pa", width: 14 },
+    { header: "Differential", key: "diff", width: 12 },
+    { header: "Tie Flag", key: "tied", width: 24 }
+  ];
+  standingsSheet.getRow(1).font = { bold: true };
+
+  for (let i = 0; i < poolsOfNames.length; i++) {
+    const poolLetter = String.fromCharCode(65 + i);
+    const standings = await calculateStandings(divisionLabel, poolLetter, poolsOfNames[i]);
+    standings.forEach((s, index) => {
+      standingsSheet.addRow({
+        pool: poolLetter,
+        rank: index + 1,
+        team: s.team,
+        gp: s.gamesPlayed,
+        wins: s.wins,
+        losses: s.losses,
+        pf: s.pointsFor,
+        pa: s.pointsAgainst,
+        diff: s.diff,
+        tied: s.tied ? "Tied - playoff needed" : ""
+      });
+    });
+  }
+
   const buffer = await workbook.xlsx.writeBuffer();
   const blob = new Blob([buffer], {
     type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
