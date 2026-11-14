@@ -840,8 +840,7 @@ html += `</li>`;
         if (semis.length === 0) {
           advancingHtml += `<p>No semifinals created yet.</p>`;
         } else {
-        const canEditScores = typeof role !== "undefined" && String(role).toLowerCase() === "admin";
-        advancingHtml += `<table border="1" cellpadding="5"><tr><th>Semifinal</th><th>Team A</th><th>Score A</th><th>Team B</th><th>Score B</th><th>Status</th>${canEditScores ? "<th>Enter scores</th>" : ""}</tr>`;
+const canEditScores = typeof role !== "undefined" && ["admin", "editor"].includes(String(role).toLowerCase());        advancingHtml += `<table border="1" cellpadding="5"><tr><th>Semifinal</th><th>Team A</th><th>Score A</th><th>Team B</th><th>Score B</th><th>Status</th>${canEditScores ? "<th>Enter scores</th>" : ""}</tr>`;
         semis.forEach(s => {
           const scoreA = s.scoreA != null ? s.scoreA : "-";
           const scoreB = s.scoreB != null ? s.scoreB : "-";
@@ -856,9 +855,8 @@ html += `</li>`;
         console.error("Could not load semifinals:", err);
         advancingHtml += `<p>Could not load semifinals.</p>`;
       }
-      const canCreateSemis = typeof role !== "undefined" && String(role).toLowerCase() === "admin";
-      if (canCreateSemis) {
-        advancingHtml += `<br><button class="createSemisBtn">Create Semifinals</button><div class="semisMessage"></div>`;
+const canCreateSemis = typeof role !== "undefined" && ["admin", "editor"].includes(String(role).toLowerCase());
+if (canCreateSemis) {        advancingHtml += `<br><button class="createSemisBtn">Create Semifinals</button><div class="semisMessage"></div>`;
       }
       advancingDiv.innerHTML = advancingHtml;
           advancingDiv.querySelectorAll(".semi-save-btn").forEach((saveBtn) => {
@@ -868,12 +866,10 @@ html += `</li>`;
           if (msgEl) msgEl.textContent = text;
         };
 
-        if (String(role).toLowerCase() !== "admin") {
-          setMsg("Only an admin can save scores.");
-          return;
-        }
-
-        const row = saveBtn.closest("tr");
+if (!["admin", "editor"].includes(String(role).toLowerCase())) {
+  setMsg("Only an admin or editor can save scores.");
+  return;
+}        const row = saveBtn.closest("tr");
         const inputA = row ? row.querySelector(".semi-input-a") : null;
         const inputB = row ? row.querySelector(".semi-input-b") : null;
         if (!inputA || !inputB) {
