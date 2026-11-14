@@ -840,14 +840,18 @@ html += `</li>`;
         if (semis.length === 0) {
           advancingHtml += `<p>No semifinals created yet.</p>`;
         } else {
-          advancingHtml += `<table border="1" cellpadding="5"><tr><th>Semifinal</th><th>Team A</th><th>Score A</th><th>Team B</th><th>Score B</th><th>Status</th></tr>`;
-          semis.forEach(s => {
-            const scoreA = s.scoreA != null ? s.scoreA : "-";
-            const scoreB = s.scoreB != null ? s.scoreB : "-";
-            advancingHtml += `<tr><td>${esc(s.slot)}</td><td>${esc(s.teamA)} (Seed ${esc(s.seedA)})</td><td>${esc(scoreA)}</td><td>${esc(s.teamB)} (Seed ${esc(s.seedB)})</td><td>${esc(scoreB)}</td><td>${s.completed ? "Complete" : "Not played"}</td></tr>`;
-          });
-          advancingHtml += `</table>`;
-        }
+        const canEditScores = typeof role !== "undefined" && String(role).toLowerCase() === "admin";
+        advancingHtml += `<table border="1" cellpadding="5"><tr><th>Semifinal</th><th>Team A</th><th>Score A</th><th>Team B</th><th>Score B</th><th>Status</th>${canEditScores ? "<th>Enter scores</th>" : ""}</tr>`;
+        semis.forEach(s => {
+          const scoreA = s.scoreA != null ? s.scoreA : "-";
+          const scoreB = s.scoreB != null ? s.scoreB : "-";
+          const editCell = canEditScores
+            ? `<td><input type="number" min="0" step="1" class="semi-input-a" data-slot="${esc(s.slot)}" value="${s.scoreA != null ? esc(s.scoreA) : ""}" style="width:60px"> - <input type="number" min="0" step="1" class="semi-input-b" data-slot="${esc(s.slot)}" value="${s.scoreB != null ? esc(s.scoreB) : ""}" style="width:60px"> <button type="button" class="semi-save-btn" data-slot="${esc(s.slot)}">Save</button></td>`
+            : "";
+          advancingHtml += `<tr><td>${esc(s.slot)}</td><td>${esc(s.teamA)} (Seed ${esc(s.seedA)})</td><td>${esc(scoreA)}</td><td>${esc(s.teamB)} (Seed ${esc(s.seedB)})</td><td>${esc(scoreB)}</td><td>${s.completed ? "Complete" : "Not played"}</td>${editCell}</tr>`;
+        });
+        advancingHtml += `</table>`;
+        if (canEditScores) advancingHtml += `<p id="semiScoreMsg"></p>`;        }
       } catch (err) {
         console.error("Could not load semifinals:", err);
         advancingHtml += `<p>Could not load semifinals.</p>`;
@@ -857,6 +861,53 @@ html += `</li>`;
         advancingHtml += `<br><button class="createSemisBtn">Create Semifinals</button><div class="semisMessage"></div>`;
       }
       advancingDiv.innerHTML = advancingHtml;
+          advancingDiv.querySelectorAll(".semi-save-btn").forEach((saveBtn) => {
+      saveBtn.addEventListener("click", async () => {
+        const msgEl = advancingDiv.querySelector("#semiScoreMsg");
+        const setMsg = (text) => {
+          if (msgEl) msgEl.textContent = text;
+        };
+
+        if (String(role).toLowerCase() !== "admin") {
+          setMsg("Only an admin can save scores.");
+          return;
+        }
+
+        const row = saveBtn.closest("tr");
+        const inputA = row ? row.querySelector(".semi-input-a") : null;
+        const inputB = row ? row.querySelector(".semi-input-b") : null;
+        if (!inputA || !inputB) {
+          setMsg("Score boxes were not found. Nothing was saved.");
+          return;
+        }
+
+        const rawA = inputA.value.trim();
+        const rawB = inputB.value.trim();
+        if (!/^\d+$/.test(rawA) || !/^\d+$/.test(rawB)) {
+          setMsg("Enter whole numbers, zero or higher, for both scores.");
+          return;
+        }
+
+        const scoreA = Number(rawA);
+        const scoreB = Number(rawB);
+        if (scoreA === scoreB) {
+          setMsg("Scores cannot be tied. Enter a winning score.");
+          return;
+        }
+
+        saveBtn.disabled = true;
+        setMsg("Saving...");
+        try {
+          const matchId = bracketMatchId(divisionLabel, saveBtn.dataset.slot);
+          await saveBracketScore(matchId, scoreA, scoreB);
+          setMsg("Score saved. Click View Advancing Teams twice to refresh the table.");
+        } catch (err) {
+          console.error("Could not save semifinal score:", err);
+          setMsg("Could not save the score. Please try again.");
+        }
+        saveBtn.disabled = false;
+      });
+    });
       if (canCreateSemis) {
         advancingDiv.querySelector(".createSemisBtn").addEventListener("click", async () => {
           const msgDiv = advancingDiv.querySelector(".semisMessage");
