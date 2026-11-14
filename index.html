@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <!-- redeploy trigger -->
+
 <head>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,19 +25,20 @@
     }
 
     #fullScheduleContainer {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 0 20px rgba(0,0,0,0.3);
-  z-index: 1000;
-  max-height: 80vh;
-  overflow-y: auto;
-  display: none;
-}
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+      max-height: 80vh;
+      overflow-y: auto;
+      display: none;
+    }
+
     h1,
     h2,
     h3 {
@@ -107,13 +109,13 @@
   <script type="module">
     // Import the functions you need from the SDKs you need
     // All imports first
-    import {initializeApp} from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
-    import {getAnalytics} from "https://www.gstatic.com/firebasejs/13.1.0/firebase-analytics.js";
-    import {getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut}
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-analytics.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut }
       from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
-    import {getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc}
+    import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc }
       from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
-    import {collection, addDoc, onSnapshot, query, where, getDocs}
+    import { collection, addDoc, onSnapshot, query, where, getDocs }
       from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
 
     // Then your Firebase configuration
@@ -219,7 +221,7 @@ ${role.toLowerCase() === "admin" ? `<button id="testPoolsBtn">Test Pool Calculat
             return;
           }
 
-          await setDoc(doc(db, "settings", "tournamentConfig"), {numCourts: numCourtsValue});
+          await setDoc(doc(db, "settings", "tournamentConfig"), { numCourts: numCourtsValue });
           alert(`Court count updated to ${numCourtsValue}. This will apply to newly generated pools.`);
         });
       }
@@ -234,48 +236,48 @@ ${role.toLowerCase() === "admin" ? `<button id="testPoolsBtn">Test Pool Calculat
 
         if (teamName && player1 && player2) {
           const maxTeamsPerDivision = 15;
-const divisionTeamsSnap = await getDocs(query(collection(db, "teams"), where("division", "==", division)));
-if (divisionTeamsSnap.size >= maxTeamsPerDivision) {
-  alert("The " + division + " division is full. Each division is limited to " + maxTeamsPerDivision + " teams.");
-  return;
-}
-          await addDoc(collection(db, "teams"), {teamName, player1, player2, division});
+          const divisionTeamsSnap = await getDocs(query(collection(db, "teams"), where("division", "==", division)));
+          if (divisionTeamsSnap.size >= maxTeamsPerDivision) {
+            alert("The " + division + " division is full. Each division is limited to " + maxTeamsPerDivision + " teams.");
+            return;
+          }
+          await addDoc(collection(db, "teams"), { teamName, player1, player2, division });
           document.getElementById("teamName").value = "";
           document.getElementById("player1").value = "";
           document.getElementById("player2").value = "";
         }
       });
       if (document.getElementById("bulkAddBtn")) {
-      document.getElementById("bulkAddBtn").addEventListener("click", async () => {
-        const testTeams = [
-          {teamName: "Dink Dynasty", player1: "Alex Morgan", player2: "Sam Lee", division: "Beginners"},
-          {teamName: "Net Ninjas", player1: "Jordan Kim", player2: "Casey Park", division: "Beginners"},
-          {teamName: "Smash Sisters", player1: "Taylor Reed", player2: "Morgan Blake", division: "Beginners"},
-          {teamName: "Kitchen Crashers", player1: "Jamie Fox", player2: "Drew Hayes", division: "Beginners"},
-          {teamName: "Paddle Pals", player1: "Chris Nolan", player2: "Pat Ryan", division: "Beginners"},
-          {teamName: "Ace Avengers", player1: "Jesse Cole", player2: "Robin Shaw", division: "Beginners"},
-          {teamName: "Volley Vipers", player1: "Dana White", player2: "Skyler Brooks", division: "Beginners"},
-          {teamName: "Lob Legends", player1: "Quinn Adams", player2: "Riley Stone", division: "Beginners"},
-          {teamName: "Serve Squad", player1: "Avery James", player2: "Logan Pierce", division: "Beginners"},
-          {teamName: "Power Paddlers", player1: "Blake Turner", player2: "Cameron Ellis", division: "Intermediate"},
-          {teamName: "Spin Doctors", player1: "Harper Lane", player2: "Rowan Gray", division: "Intermediate"},
-          {teamName: "Fault Line", player1: "Emerson Clark", player2: "Sage Walker", division: "Intermediate"},
-          {teamName: "Rally Rebels", player1: "Finley Scott", player2: "Hayden Moss", division: "Intermediate"},
-          {teamName: "Drop Shot Dragons", player1: "Parker Reyes", player2: "Elliot Vance", division: "Intermediate"},
-          {teamName: "Backspin Bandits", player1: "Reese Carter", player2: "Morgan Lee", division: "Intermediate"},
-          {teamName: "Baseline Bosses", player1: "Jules Owens", player2: "Micah Hart", division: "Intermediate"},
-          {teamName: "Smash Masters", player1: "Tatum Reed", player2: "Shawn Brooks", division: "Intermediate"},
-          {teamName: "Dink or Swim", player1: "Noel Rivera", player2: "Kendall Fox", division: "Intermediate"},
-          {teamName: "Top Spin Titans", player1: "Remy Jordan", player2: "Payton Cruz", division: "Intermediate"},
-          {teamName: "Court Crushers", player1: "Marlowe Bennett", player2: "Sawyer Hughes", division: "Intermediate"}
-        ];
+        document.getElementById("bulkAddBtn").addEventListener("click", async () => {
+          const testTeams = [
+            { teamName: "Dink Dynasty", player1: "Alex Morgan", player2: "Sam Lee", division: "Beginners" },
+            { teamName: "Net Ninjas", player1: "Jordan Kim", player2: "Casey Park", division: "Beginners" },
+            { teamName: "Smash Sisters", player1: "Taylor Reed", player2: "Morgan Blake", division: "Beginners" },
+            { teamName: "Kitchen Crashers", player1: "Jamie Fox", player2: "Drew Hayes", division: "Beginners" },
+            { teamName: "Paddle Pals", player1: "Chris Nolan", player2: "Pat Ryan", division: "Beginners" },
+            { teamName: "Ace Avengers", player1: "Jesse Cole", player2: "Robin Shaw", division: "Beginners" },
+            { teamName: "Volley Vipers", player1: "Dana White", player2: "Skyler Brooks", division: "Beginners" },
+            { teamName: "Lob Legends", player1: "Quinn Adams", player2: "Riley Stone", division: "Beginners" },
+            { teamName: "Serve Squad", player1: "Avery James", player2: "Logan Pierce", division: "Beginners" },
+            { teamName: "Power Paddlers", player1: "Blake Turner", player2: "Cameron Ellis", division: "Intermediate" },
+            { teamName: "Spin Doctors", player1: "Harper Lane", player2: "Rowan Gray", division: "Intermediate" },
+            { teamName: "Fault Line", player1: "Emerson Clark", player2: "Sage Walker", division: "Intermediate" },
+            { teamName: "Rally Rebels", player1: "Finley Scott", player2: "Hayden Moss", division: "Intermediate" },
+            { teamName: "Drop Shot Dragons", player1: "Parker Reyes", player2: "Elliot Vance", division: "Intermediate" },
+            { teamName: "Backspin Bandits", player1: "Reese Carter", player2: "Morgan Lee", division: "Intermediate" },
+            { teamName: "Baseline Bosses", player1: "Jules Owens", player2: "Micah Hart", division: "Intermediate" },
+            { teamName: "Smash Masters", player1: "Tatum Reed", player2: "Shawn Brooks", division: "Intermediate" },
+            { teamName: "Dink or Swim", player1: "Noel Rivera", player2: "Kendall Fox", division: "Intermediate" },
+            { teamName: "Top Spin Titans", player1: "Remy Jordan", player2: "Payton Cruz", division: "Intermediate" },
+            { teamName: "Court Crushers", player1: "Marlowe Bennett", player2: "Sawyer Hughes", division: "Intermediate" }
+          ];
 
-        for (const team of testTeams) {
-          await addDoc(collection(db, "teams"), team);
-        }
+          for (const team of testTeams) {
+            await addDoc(collection(db, "teams"), team);
+          }
 
-        console.log("Bulk test teams added!");
-      });
+          console.log("Bulk test teams added!");
+        });
       }
       function shuffleArray(array) {
         const arr = [...array];
@@ -297,192 +299,192 @@ if (divisionTeamsSnap.size >= maxTeamsPerDivision) {
         return pools;
       }
       function generateRoundRobinMatches(teams) {
-  let teamList = [...teams];
+        let teamList = [...teams];
 
-  if (teamList.length % 2 !== 0) {
-    teamList.push("BYE");
-  }
+        if (teamList.length % 2 !== 0) {
+          teamList.push("BYE");
+        }
 
-  const numRounds = teamList.length - 1;
-  const half = teamList.length / 2;
-  const matches = [];
+        const numRounds = teamList.length - 1;
+        const half = teamList.length / 2;
+        const matches = [];
 
-  for (let round = 0; round < numRounds; round++) {
-    for (let i = 0; i < half; i++) {
-      const teamA = teamList[i];
-      const teamB = teamList[teamList.length - 1 - i];
+        for (let round = 0; round < numRounds; round++) {
+          for (let i = 0; i < half; i++) {
+            const teamA = teamList[i];
+            const teamB = teamList[teamList.length - 1 - i];
 
-      if (teamA !== "BYE" && teamB !== "BYE") {
-        matches.push([teamA, teamB, round + 1]);
+            if (teamA !== "BYE" && teamB !== "BYE") {
+              matches.push([teamA, teamB, round + 1]);
+            }
+          }
+
+          const fixedTeam = teamList[0];
+          const rotatingTeams = teamList.slice(1);
+          rotatingTeams.unshift(rotatingTeams.pop());
+          teamList = [fixedTeam, ...rotatingTeams];
+        }
+
+        return matches;
       }
-    }
-
-    const fixedTeam = teamList[0];
-    const rotatingTeams = teamList.slice(1);
-    rotatingTeams.unshift(rotatingTeams.pop());
-    teamList = [fixedTeam, ...rotatingTeams];
-  }
-
-  return matches;
-}
       async function getTeamsByDivision(division) {
-        if (!division) {console.warn("Skipped getTeamsByDivision: division is undefined"); return [];}
+        if (!division) { console.warn("Skipped getTeamsByDivision: division is undefined"); return []; }
         const q = query(collection(db, "teams"), where("division", "==", division));
         const snapshot = await getDocs(q);
-        return snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       }
       async function savePoolsToFirestore(division, pools) {
         const poolsData = pools.map((pool, i) => ({
           poolName: String.fromCharCode(65 + i),
           teams: pool.map(t => t.teamName)
         }));
-        await setDoc(doc(db, "pools", division), {pools: poolsData});
+        await setDoc(doc(db, "pools", division), { pools: poolsData });
       }
 
       async function saveMatchesToFirestore(division, pools) {
-  if (!division) { console.warn("Skipped saveMatchesToFirestore: division is undefined"); return; }
+        if (!division) { console.warn("Skipped saveMatchesToFirestore: division is undefined"); return; }
 
-  // Remove any previously saved matches for this division
-  const q = query(collection(db, "matches"), where("division", "==", division));
-  const existingMatches = await getDocs(q);
-  for (const docSnap of existingMatches.docs) {
-    await deleteDoc(docSnap.ref);
-  }
+        // Remove any previously saved matches for this division
+        const q = query(collection(db, "matches"), where("division", "==", division));
+        const existingMatches = await getDocs(q);
+        for (const docSnap of existingMatches.docs) {
+          await deleteDoc(docSnap.ref);
+        }
 
-  // Read the current number of courts from settings
-  const settingsSnap = await getDoc(doc(db, "settings", "tournamentConfig"));
-  const numCourts = settingsSnap.exists() ? settingsSnap.data().numCourts : 4;
+        // Read the current number of courts from settings
+        const settingsSnap = await getDoc(doc(db, "settings", "tournamentConfig"));
+        const numCourts = settingsSnap.exists() ? settingsSnap.data().numCourts : 4;
 
-  // Collect every match from every pool first, tagged with its pool letter
-  const allMatches = [];
-  for (let i = 0; i < pools.length; i++) {
-    const poolLetter = String.fromCharCode(65 + i);
-    const matches = generateRoundRobinMatches(pools[i]);
-    for (const [teamA, teamB, round] of matches) {
-      allMatches.push({ poolLetter, teamA, teamB, round });
-    }
-  }
+        // Collect every match from every pool first, tagged with its pool letter
+        const allMatches = [];
+        for (let i = 0; i < pools.length; i++) {
+          const poolLetter = String.fromCharCode(65 + i);
+          const matches = generateRoundRobinMatches(pools[i]);
+          for (const [teamA, teamB, round] of matches) {
+            allMatches.push({ poolLetter, teamA, teamB, round });
+          }
+        }
 
-  // Group matches by round so courts can rotate fresh within each round
-  const matchesByRound = {};
-  for (const match of allMatches) {
-    if (!matchesByRound[match.round]) matchesByRound[match.round] = [];
-    matchesByRound[match.round].push(match);
-  }
+        // Group matches by round so courts can rotate fresh within each round
+        const matchesByRound = {};
+        for (const match of allMatches) {
+          if (!matchesByRound[match.round]) matchesByRound[match.round] = [];
+          matchesByRound[match.round].push(match);
+        }
 
-  // Write each match, assigning courts per round instead of globally
-  for (const roundNumber of Object.keys(matchesByRound)) {
-    const roundMatches = matchesByRound[roundNumber];
-    for (let i = 0; i < roundMatches.length; i++) {
-      const { poolLetter, teamA, teamB, round } = roundMatches[i];
-      const courtNumber = (i % numCourts) + 1;
+        // Write each match, assigning courts per round instead of globally
+        for (const roundNumber of Object.keys(matchesByRound)) {
+          const roundMatches = matchesByRound[roundNumber];
+          for (let i = 0; i < roundMatches.length; i++) {
+            const { poolLetter, teamA, teamB, round } = roundMatches[i];
+            const courtNumber = (i % numCourts) + 1;
 
-      const [sortedA, sortedB] = [teamA.teamName, teamB.teamName].sort();
-const matchId = `${division}_${poolLetter}_${sortedA}_vs_${sortedB}`
-  .replace(/[^a-zA-Z0-9]/g, "_");
-await setDoc(doc(db, "matches", matchId), {
-  division: division,
-  poolName: poolLetter,
-  round: round,
-  teamA: sortedA,
-  teamB: sortedB,
-  scoreA: null,
-  scoreB: null,
-  completed: false,
-  court: courtNumber
-});
-        
-    }
-  }
-}
+            const [sortedA, sortedB] = [teamA.teamName, teamB.teamName].sort();
+            const matchId = `${division}_${poolLetter}_${sortedA}_vs_${sortedB}`
+              .replace(/[^a-zA-Z0-9]/g, "_");
+            await setDoc(doc(db, "matches", matchId), {
+              division: division,
+              poolName: poolLetter,
+              round: round,
+              teamA: sortedA,
+              teamB: sortedB,
+              scoreA: null,
+              scoreB: null,
+              completed: false,
+              court: courtNumber
+            });
+
+          }
+        }
+      }
 
       async function saveMatchScore(matchId, scoreA, scoreB) {
-  if (!matchId) {
-    console.warn("Skipped saveMatchScore: missing matchId");
-    return;
-  }
-  await updateDoc(doc(db, "matches", matchId), { scoreA, scoreB, completed: true });
-}
-function renderScoreCell(matchId, existing, editing = false) {
-  const hasScore =
-    existing &&
-    existing.scoreA !== null && existing.scoreA !== undefined && existing.scoreA !== "" &&
-    existing.scoreB !== null && existing.scoreB !== undefined && existing.scoreB !== "" &&
-    !(Number(existing.scoreA) === 0 && Number(existing.scoreB) === 0);
+        if (!matchId) {
+          console.warn("Skipped saveMatchScore: missing matchId");
+          return;
+        }
+        await updateDoc(doc(db, "matches", matchId), { scoreA, scoreB, completed: true });
+      }
+      function renderScoreCell(matchId, existing, editing = false) {
+        const hasScore =
+          existing &&
+          existing.scoreA !== null && existing.scoreA !== undefined && existing.scoreA !== "" &&
+          existing.scoreB !== null && existing.scoreB !== undefined && existing.scoreB !== "" &&
+          !(Number(existing.scoreA) === 0 && Number(existing.scoreB) === 0);
 
-  if (hasScore && !editing) {
-    return `${existing.scoreA} - ${existing.scoreB} <button class="editScoreBtn" data-match="${matchId}" data-scorea="${existing.scoreA}" data-scoreb="${existing.scoreB}">Edit</button>`;
-  } else {
-    const valA = hasScore ? existing.scoreA : "";
-    const valB = hasScore ? existing.scoreB : "";
-    return `<input type="number" class="scoreA" data-match="${matchId}" style="width:40px" placeholder="0" value="${valA}">` +
-      ` - ` +
-      `<input type="number" class="scoreB" data-match="${matchId}" style="width:40px" placeholder="0" value="${valB}">` +
-      `<button class="saveScoreBtn" data-match="${matchId}">Save</button>`;
-  }
-}
+        if (hasScore && !editing) {
+          return `${existing.scoreA} - ${existing.scoreB} <button class="editScoreBtn" data-match="${matchId}" data-scorea="${existing.scoreA}" data-scoreb="${existing.scoreB}">Edit</button>`;
+        } else {
+          const valA = hasScore ? existing.scoreA : "";
+          const valB = hasScore ? existing.scoreB : "";
+          return `<input type="number" class="scoreA" data-match="${matchId}" style="width:40px" placeholder="0" value="${valA}">` +
+            ` - ` +
+            `<input type="number" class="scoreB" data-match="${matchId}" style="width:40px" placeholder="0" value="${valB}">` +
+            `<button class="saveScoreBtn" data-match="${matchId}">Save</button>`;
+        }
+      }
 
 
-window.editMatchScore = function(matchId) {
-  const display = document.getElementById(`scoreDisplay_${matchId}`);
-  const [scoreA, scoreB] = display.textContent.split(" - ");
-  document.getElementById(`scoreCell_${matchId}`).innerHTML =
-    `<input type="number" id="scoreA_${matchId}" style="width:50px" value="${scoreA.trim()}"> - <input type="number" id="scoreB_${matchId}" style="width:50px" value="${scoreB.trim()}"> <button onclick="submitMatchScore('${matchId}')">Save</button>`;
-};
+      window.editMatchScore = function (matchId) {
+        const display = document.getElementById(`scoreDisplay_${matchId}`);
+        const [scoreA, scoreB] = display.textContent.split(" - ");
+        document.getElementById(`scoreCell_${matchId}`).innerHTML =
+          `<input type="number" id="scoreA_${matchId}" style="width:50px" value="${scoreA.trim()}"> - <input type="number" id="scoreB_${matchId}" style="width:50px" value="${scoreB.trim()}"> <button onclick="submitMatchScore('${matchId}')">Save</button>`;
+      };
 
-window.submitMatchScore = async function(matchId) {
-  const row = document.getElementById(`row_${matchId}`);
-  const scoreA = Number(document.getElementById(`scoreA_${matchId}`).value);
-  const scoreB = Number(document.getElementById(`scoreB_${matchId}`).value);
+      window.submitMatchScore = async function (matchId) {
+        const row = document.getElementById(`row_${matchId}`);
+        const scoreA = Number(document.getElementById(`scoreA_${matchId}`).value);
+        const scoreB = Number(document.getElementById(`scoreB_${matchId}`).value);
 
-  await saveMatchScore(matchId, scoreA, scoreB);
+        await saveMatchScore(matchId, scoreA, scoreB);
 
-  document.getElementById(`scoreCell_${matchId}`).innerHTML =
-    `<span id="scoreDisplay_${matchId}">${scoreA} - ${scoreB}</span> <button onclick="editMatchScore('${matchId}')">Edit</button>`;
-  document.getElementById(`status_${matchId}`).textContent = "Completed";
-};
+        document.getElementById(`scoreCell_${matchId}`).innerHTML =
+          `<span id="scoreDisplay_${matchId}">${scoreA} - ${scoreB}</span> <button onclick="editMatchScore('${matchId}')">Edit</button>`;
+        document.getElementById(`status_${matchId}`).textContent = "Completed";
+      };
       async function showFullSchedule() {
-  const divisions = ["Beginners", "Intermediate"];
-  let html = `<h3>Full Match Schedule</h3>`;
-html += `<button onclick="document.getElementById('fullScheduleContainer').style.display='none'">Close</button>`;
-  for (const division of divisions) {
-    const poolsData = await loadPoolsFromFirestore(division);
-    if (!poolsData) continue;
-    const savedScores = await getMatchScores(division);
+        const divisions = ["Beginners", "Intermediate"];
+        let html = `<h3>Full Match Schedule</h3>`;
+        html += `<button onclick="document.getElementById('fullScheduleContainer').style.display='none'">Close</button>`;
+        for (const division of divisions) {
+          const poolsData = await loadPoolsFromFirestore(division);
+          if (!poolsData) continue;
+          const savedScores = await getMatchScores(division);
 
-    html += `<h4>${division}</h4>`;
+          html += `<h4>${division}</h4>`;
 
-    poolsData.forEach(pool => {
-      const poolLetter = pool.poolName;
-      const poolMatches = Object.entries(savedScores)
-        .filter(([matchId, data]) => data.poolName === poolLetter)
-        .map(([matchId, data]) => ({ matchId, ...data }));
+          poolsData.forEach(pool => {
+            const poolLetter = pool.poolName;
+            const poolMatches = Object.entries(savedScores)
+              .filter(([matchId, data]) => data.poolName === poolLetter)
+              .map(([matchId, data]) => ({ matchId, ...data }));
 
-      const matchesByRound = {};
-      poolMatches.forEach(m => {
-        if (!matchesByRound[m.round]) matchesByRound[m.round] = [];
-        matchesByRound[m.round].push(m);
-      });
+            const matchesByRound = {};
+            poolMatches.forEach(m => {
+              if (!matchesByRound[m.round]) matchesByRound[m.round] = [];
+              matchesByRound[m.round].push(m);
+            });
 
-  html += `<h5>Pool ${poolLetter}</h5>`;
-Object.keys(matchesByRound).sort((x, y) => x - y).forEach(roundNum => {
-  html += `<h6>Round ${roundNum}</h6><table border="1" cellpadding="5"><tr><th>Court</th><th>Match</th><th>Score</th><th>Status</th></tr>`;
-  matchesByRound[roundNum].forEach(m => {
-    const matchId = `${division}_${m.poolName}_${m.teamA}_${m.teamB}`.replace(/\s+/g, "_");
-    const statusText = m.completed ? "Completed" : "Pending";
+            html += `<h5>Pool ${poolLetter}</h5>`;
+            Object.keys(matchesByRound).sort((x, y) => x - y).forEach(roundNum => {
+              html += `<h6>Round ${roundNum}</h6><table border="1" cellpadding="5"><tr><th>Court</th><th>Match</th><th>Score</th><th>Status</th></tr>`;
+              matchesByRound[roundNum].forEach(m => {
+                const matchId = `${division}_${m.poolName}_${m.teamA}_${m.teamB}`.replace(/\s+/g, "_");
+                const statusText = m.completed ? "Completed" : "Pending";
 
-    const scoreCell = m.completed
-      ? `<span id="scoreDisplay_${matchId}">${m.scoreA} - ${m.scoreB}</span> <button onclick="editMatchScore('${matchId}')">Edit</button>`
-      : `<input type="number" id="scoreA_${matchId}" style="width:50px" value="${m.scoreA ?? ''}"> - <input type="number" id="scoreB_${matchId}" style="width:50px" value="${m.scoreB ?? ''}"> <button onclick="submitMatchScore('${matchId}')">Save</button>`;
+                const scoreCell = m.completed
+                  ? `<span id="scoreDisplay_${matchId}">${m.scoreA} - ${m.scoreB}</span> <button onclick="editMatchScore('${matchId}')">Edit</button>`
+                  : `<input type="number" id="scoreA_${matchId}" style="width:50px" value="${m.scoreA ?? ''}"> - <input type="number" id="scoreB_${matchId}" style="width:50px" value="${m.scoreB ?? ''}"> <button onclick="submitMatchScore('${matchId}')">Save</button>`;
 
-    html += `<tr id="row_${matchId}" data-division="${division}" data-pool="${m.poolName}" data-team-a="${m.teamA}" data-team-b="${m.teamB}"><td>Court ${m.court}</td><td>${m.teamA} vs. ${m.teamB}</td><td id="scoreCell_${matchId}">${scoreCell}</td><td id="status_${matchId}">${statusText}</td></tr>`;
-  });
-    html += `</table>`;
-});
-    }); // closes poolsData.forEach(pool => {...})
-  } // closes for (const division of divisions) {...}
+                html += `<tr id="row_${matchId}" data-division="${division}" data-pool="${m.poolName}" data-team-a="${m.teamA}" data-team-b="${m.teamB}"><td>Court ${m.court}</td><td>${m.teamA} vs. ${m.teamB}</td><td id="scoreCell_${matchId}">${scoreCell}</td><td id="status_${matchId}">${statusText}</td></tr>`;
+              });
+              html += `</table>`;
+            });
+          }); // closes poolsData.forEach(pool => {...})
+        } // closes for (const division of divisions) {...}
 
-  const scheduleDiv = document.getElementById("fullScheduleContainer");
+        const scheduleDiv = document.getElementById("fullScheduleContainer");
         if (scheduleDiv) {
           scheduleDiv.innerHTML = html;
           scheduleDiv.style.display = "block";
@@ -490,200 +492,200 @@ Object.keys(matchesByRound).sort((x, y) => x - y).forEach(roundNum => {
       }
 
       async function calculateStandings(division, poolLetter, teamNames) {
-  if (!division || !poolLetter) {
-    console.warn("Skipped calculateStandings: missing field(s)", {division, poolLetter});
-    return [];
-  }
-  const q = query(
-    collection(db, "matches"),
-    where("division", "==", division),
-    where("poolName", "==", poolLetter)
-  );
-  const snapshot = await getDocs(q);
-  const matches = snapshot.docs.map(d => d.data());
-  const stats = {};
-  teamNames.forEach(name => {
-    stats[name] = {team: name, wins: 0, losses: 0, gamesPlayed: 0, pointsFor: 0, pointsAgainst: 0, diff: 0, tied: false};
-  });
+        if (!division || !poolLetter) {
+          console.warn("Skipped calculateStandings: missing field(s)", { division, poolLetter });
+          return [];
+        }
+        const q = query(
+          collection(db, "matches"),
+          where("division", "==", division),
+          where("poolName", "==", poolLetter)
+        );
+        const snapshot = await getDocs(q);
+        const matches = snapshot.docs.map(d => d.data());
+        const stats = {};
+        teamNames.forEach(name => {
+          stats[name] = { team: name, wins: 0, losses: 0, gamesPlayed: 0, pointsFor: 0, pointsAgainst: 0, diff: 0, tied: false };
+        });
 
-  matches.forEach(m => {
-    if (!m.completed) return;
-    if (!stats[m.teamA] || !stats[m.teamB]) {
-      console.warn("calculateStandings: match team not in pool, skipped", m.teamA, m.teamB);
-      return;
-    }
-    const a = Number(m.scoreA) || 0;
-    const b = Number(m.scoreB) || 0;
-    stats[m.teamA].gamesPlayed++;
-    stats[m.teamB].gamesPlayed++;
-    stats[m.teamA].pointsFor += a;
-    stats[m.teamA].pointsAgainst += b;
-    stats[m.teamB].pointsFor += b;
-    stats[m.teamB].pointsAgainst += a;
-    if (a > b) {stats[m.teamA].wins++; stats[m.teamB].losses++;}
-    else if (b > a) {stats[m.teamB].wins++; stats[m.teamA].losses++;}
-  });
+        matches.forEach(m => {
+          if (!m.completed) return;
+          if (!stats[m.teamA] || !stats[m.teamB]) {
+            console.warn("calculateStandings: match team not in pool, skipped", m.teamA, m.teamB);
+            return;
+          }
+          const a = Number(m.scoreA) || 0;
+          const b = Number(m.scoreB) || 0;
+          stats[m.teamA].gamesPlayed++;
+          stats[m.teamB].gamesPlayed++;
+          stats[m.teamA].pointsFor += a;
+          stats[m.teamA].pointsAgainst += b;
+          stats[m.teamB].pointsFor += b;
+          stats[m.teamB].pointsAgainst += a;
+          if (a > b) { stats[m.teamA].wins++; stats[m.teamB].losses++; }
+          else if (b > a) { stats[m.teamB].wins++; stats[m.teamA].losses++; }
+        });
 
-  Object.values(stats).forEach(s => s.diff = s.pointsFor - s.pointsAgainst);
+        Object.values(stats).forEach(s => s.diff = s.pointsFor - s.pointsAgainst);
 
-  // Rank by wins, then point differential, then total points scored
-  const sorted = Object.values(stats).sort((x, y) =>
-    (y.wins - x.wins) || (y.diff - x.diff) || (y.pointsFor - x.pointsFor)
-  );
+        // Rank by wins, then point differential, then total points scored
+        const sorted = Object.values(stats).sort((x, y) =>
+          (y.wins - x.wins) || (y.diff - x.diff) || (y.pointsFor - x.pointsFor)
+        );
 
-  // Flag teams still tied on all three measures (a playoff game is needed)
-  const sameAs = (s, o) => o && o.wins === s.wins && o.diff === s.diff && o.pointsFor === s.pointsFor;
-  sorted.forEach((s, i) => {
-    s.tied = !!(sameAs(s, sorted[i - 1]) || sameAs(s, sorted[i + 1]));
-  });
+        // Flag teams still tied on all three measures (a playoff game is needed)
+        const sameAs = (s, o) => o && o.wins === s.wins && o.diff === s.diff && o.pointsFor === s.pointsFor;
+        sorted.forEach((s, i) => {
+          s.tied = !!(sameAs(s, sorted[i - 1]) || sameAs(s, sorted[i + 1]));
+        });
 
-  return sorted;
-}
+        return sorted;
+      }
 
       async function getAdvancingTeams(division, poolsOfNames) {
-  const results = [];
-  for (let i = 0; i < poolsOfNames.length; i++) {
-    const poolLetter = String.fromCharCode(65 + i);
-    const standings = await calculateStandings(division, poolLetter, poolsOfNames[i]);
-    results.push({
-      pool: poolLetter,
-      first: standings[0] ? standings[0].team : "-",
-      second: standings[1] ? standings[1].team : "-",
-      firstStats: standings[0] || null,
-      secondStats: standings[1] || null
-    });
-  }
+        const results = [];
+        for (let i = 0; i < poolsOfNames.length; i++) {
+          const poolLetter = String.fromCharCode(65 + i);
+          const standings = await calculateStandings(division, poolLetter, poolsOfNames[i]);
+          results.push({
+            pool: poolLetter,
+            first: standings[0] ? standings[0].team : "-",
+            second: standings[1] ? standings[1].team : "-",
+            firstStats: standings[0] || null,
+            secondStats: standings[1] || null
+          });
+        }
 
 
-  return results;
-}
+        return results;
+      }
 
-function rankAdvancingTeams(results) {
-  const entries = [];
-  results.forEach(r => {
-    if (r.firstStats) entries.push({ ...r.firstStats, pool: r.pool, place: 1 });
-    if (r.secondStats) entries.push({ ...r.secondStats, pool: r.pool, place: 2 });
-  });
+      function rankAdvancingTeams(results) {
+        const entries = [];
+        results.forEach(r => {
+          if (r.firstStats) entries.push({ ...r.firstStats, pool: r.pool, place: 1 });
+          if (r.secondStats) entries.push({ ...r.secondStats, pool: r.pool, place: 2 });
+        });
 
-  entries.forEach(e => {
-    const gp = e.gamesPlayed || ((e.wins || 0) + (e.losses || 0));
-    e.winPct = gp > 0 ? e.wins / gp : 0;
-    e.avgDiff = gp > 0 ? e.diff / gp : 0;
-    e.avgPoints = gp > 0 ? e.pointsFor / gp : 0;
-    e.crossTie = false;
-  });
+        entries.forEach(e => {
+          const gp = e.gamesPlayed || ((e.wins || 0) + (e.losses || 0));
+          e.winPct = gp > 0 ? e.wins / gp : 0;
+          e.avgDiff = gp > 0 ? e.diff / gp : 0;
+          e.avgPoints = gp > 0 ? e.pointsFor / gp : 0;
+          e.crossTie = false;
+        });
 
-  entries.sort((a, b) => {
-    if (a.place !== b.place) return a.place - b.place;
-    if (b.winPct !== a.winPct) return b.winPct - a.winPct;
-    if (b.avgDiff !== a.avgDiff) return b.avgDiff - a.avgDiff;
-    return b.avgPoints - a.avgPoints;
-  });
+        entries.sort((a, b) => {
+          if (a.place !== b.place) return a.place - b.place;
+          if (b.winPct !== a.winPct) return b.winPct - a.winPct;
+          if (b.avgDiff !== a.avgDiff) return b.avgDiff - a.avgDiff;
+          return b.avgPoints - a.avgPoints;
+        });
 
-  for (let i = 0; i < entries.length; i++) {
-    const a = entries[i];
-    const b = entries[i + 1];
-    a.seed = i + 1;
-    if (b && a.place === b.place &&
-        Math.abs(a.winPct - b.winPct) < 1e-9 &&
-        Math.abs(a.avgDiff - b.avgDiff) < 1e-9 &&
-        Math.abs(a.avgPoints - b.avgPoints) < 1e-9) {
-      a.crossTie = true;
-      b.crossTie = true;
-    }
-  }
-  return entries;
-}
-function buildBracketPairings(entries) {
-  if (!entries || entries.length < 4) {
-    return { ok: false, reason: "Fewer than four advancing teams." };
-  }
-  if (entries.slice(0, 5).some(e => e.crossTie)) {
-    return { ok: false, reason: "A tie affects the top four or the seed 4/5 cutoff." };
-  }
+        for (let i = 0; i < entries.length; i++) {
+          const a = entries[i];
+          const b = entries[i + 1];
+          a.seed = i + 1;
+          if (b && a.place === b.place &&
+            Math.abs(a.winPct - b.winPct) < 1e-9 &&
+            Math.abs(a.avgDiff - b.avgDiff) < 1e-9 &&
+            Math.abs(a.avgPoints - b.avgPoints) < 1e-9) {
+            a.crossTie = true;
+            b.crossTie = true;
+          }
+        }
+        return entries;
+      }
+      function buildBracketPairings(entries) {
+        if (!entries || entries.length < 4) {
+          return { ok: false, reason: "Fewer than four advancing teams." };
+        }
+        if (entries.slice(0, 5).some(e => e.crossTie)) {
+          return { ok: false, reason: "A tie affects the top four or the seed 4/5 cutoff." };
+        }
 
-  const top = entries.slice(0, 4);
-  const samePool = (pair) => pair[0].pool === pair[1].pool;
+        const top = entries.slice(0, 4);
+        const samePool = (pair) => pair[0].pool === pair[1].pool;
 
-  let semi1 = [top[0], top[3]];
-  let semi2 = [top[1], top[2]];
+        let semi1 = [top[0], top[3]];
+        let semi2 = [top[1], top[2]];
 
-  if (samePool(semi1) || samePool(semi2)) {
-    const alt1 = [top[0], top[2]];
-    const alt2 = [top[1], top[3]];
-    if (!samePool(alt1) && !samePool(alt2)) {
-      semi1 = alt1;
-      semi2 = alt2;
-    }
-  }
+        if (samePool(semi1) || samePool(semi2)) {
+          const alt1 = [top[0], top[2]];
+          const alt2 = [top[1], top[3]];
+          if (!samePool(alt1) && !samePool(alt2)) {
+            semi1 = alt1;
+            semi2 = alt2;
+          }
+        }
 
-  return {
-    ok: true,
-    semifinals: [
-      { slot: 1, teamA: semi1[0], teamB: semi1[1] },
-      { slot: 2, teamA: semi2[0], teamB: semi2[1] }
-    ]
-  };
-}
+        return {
+          ok: true,
+          semifinals: [
+            { slot: 1, teamA: semi1[0], teamB: semi1[1] },
+            { slot: 2, teamA: semi2[0], teamB: semi2[1] }
+          ]
+        };
+      }
 
 
-function bracketMatchId(division, slot) {
-  return String(division).replace(/[^a-zA-Z0-9]/g, "_") + "_semi" + slot;
-}
+      function bracketMatchId(division, slot) {
+        return String(division).replace(/[^a-zA-Z0-9]/g, "_") + "_semi" + slot;
+      }
 
-async function saveBracketToFirestore(division, pairings) {
-  if (!division || !pairings || !pairings.ok) return false;
-  for (const semi of pairings.semifinals) {
-    await setDoc(doc(db, "bracketMatches", bracketMatchId(division, semi.slot)), {
-      division: division,
-      round: "semifinal",
-      slot: semi.slot,
-      teamA: semi.teamA.team,
-      teamB: semi.teamB.team,
-      poolA: semi.teamA.pool,
-      poolB: semi.teamB.pool,
-      seedA: semi.teamA.seed,
-      seedB: semi.teamB.seed,
-      scoreA: null,
-      scoreB: null,
-      completed: false
-    });
-  }
-  return true;
-}
+      async function saveBracketToFirestore(division, pairings) {
+        if (!division || !pairings || !pairings.ok) return false;
+        for (const semi of pairings.semifinals) {
+          await setDoc(doc(db, "bracketMatches", bracketMatchId(division, semi.slot)), {
+            division: division,
+            round: "semifinal",
+            slot: semi.slot,
+            teamA: semi.teamA.team,
+            teamB: semi.teamB.team,
+            poolA: semi.teamA.pool,
+            poolB: semi.teamB.pool,
+            seedA: semi.teamA.seed,
+            seedB: semi.teamB.seed,
+            scoreA: null,
+            scoreB: null,
+            completed: false
+          });
+        }
+        return true;
+      }
 
-async function saveBracketScore(matchId, scoreA, scoreB) {
-  if (!matchId) return;
-  await updateDoc(doc(db, "bracketMatches", matchId), { scoreA, scoreB, completed: true });
-}
+      async function saveBracketScore(matchId, scoreA, scoreB) {
+        if (!matchId) return;
+        await updateDoc(doc(db, "bracketMatches", matchId), { scoreA, scoreB, completed: true });
+      }
 
-async function deleteBracketFromFirestore(division) {
-  if (!division) return;
-  for (const slot of [1, 2]) {
-    await deleteDoc(doc(db, "bracketMatches", bracketMatchId(division, slot)));
-  }
-}
+      async function deleteBracketFromFirestore(division) {
+        if (!division) return;
+        for (const slot of [1, 2]) {
+          await deleteDoc(doc(db, "bracketMatches", bracketMatchId(division, slot)));
+        }
+      }
 
-async function getMatchScores(division) {
-  if (!division) {console.warn("Skipped getMatchScores: division is undefined"); return {};}
-  const q = query(collection(db, "matches"), where("division", "==", division));
-  const snapshot = await getDocs(q);
-  const scores = {};
-  snapshot.docs.forEach(d => {
-    const data = d.data();
-    scores[d.id] = {
-      scoreA: data.scoreA || 0,
-      scoreB: data.scoreB || 0,
-      completed: data.completed || false,
-      round: data.round || 1,
-      poolName: data.poolName,
-      teamA: data.teamA,
-      teamB: data.teamB,
-      court: data.court || null
-    };
-  });
-  return scores;
-}
+      async function getMatchScores(division) {
+        if (!division) { console.warn("Skipped getMatchScores: division is undefined"); return {}; }
+        const q = query(collection(db, "matches"), where("division", "==", division));
+        const snapshot = await getDocs(q);
+        const scores = {};
+        snapshot.docs.forEach(d => {
+          const data = d.data();
+          scores[d.id] = {
+            scoreA: data.scoreA || 0,
+            scoreB: data.scoreB || 0,
+            completed: data.completed || false,
+            round: data.round || 1,
+            poolName: data.poolName,
+            teamA: data.teamA,
+            teamB: data.teamB,
+            court: data.court || null
+          };
+        });
+        return scores;
+      }
 
       async function loadPoolsFromFirestore(division) {
         const docSnap = await getDoc(doc(db, "pools", division));
@@ -696,32 +698,32 @@ async function getMatchScores(division) {
         const savedScores = await getMatchScores(divisionLabel);
         let html = `<h4>${divisionLabel} (${teamCount} teams)</h4>`;
 
-        
-        
+
+
         html += `<button class="viewAdvancingBtn" data-division="${divisionLabel}">View Advancing Teams</button>`;
         html += `<button class="downloadCsvBtn" data-division="${divisionLabel}">Download Results (CSV)</button>`;
         html += `<button class="printResultsBtn" data-division="${divisionLabel}">Print Results</button>`;
         html += `<button class="downloadXlsxBtn" data-division="${divisionLabel}">Download Excel</button>`;
         html += `<div id="${elementId}-advancing" style="display:none"></div>`;
         poolsOfNames.forEach((poolNames, i) => {
-  const poolLetter = String.fromCharCode(65 + i);
-  const poolId = `${elementId}-pool-${poolLetter}`;
-  html += `<p><strong>Pool ${poolLetter}:</strong> ${poolNames.join(", ")}</p>`;
-  html += `<div id="${poolId}-matches">`;
-  html += `<ul>`;
-  for (let a = 0; a < poolNames.length; a++) {
-    for (let b = a + 1; b < poolNames.length; b++) {
-      const [sortedA, sortedB] = [poolNames[a], poolNames[b]].sort();
-      const matchId = `${divisionLabel}_${poolLetter}_${sortedA}_vs_${sortedB}`.replace(/[^a-zA-Z0-9]/g, "_");
-      const existing = savedScores[matchId];
-      const scoreAVal = existing ? existing.scoreA : "";
-      const scoreBVal = existing ? existing.scoreB : "";
-      html += `<li>`;
-html += `${sortedA} vs. ${sortedB} `;
-html += `<span id="scoreCell_${matchId}">${renderScoreCell(matchId, existing)}</span>`;
-html += `</li>`;
-    }
-  }
+          const poolLetter = String.fromCharCode(65 + i);
+          const poolId = `${elementId}-pool-${poolLetter}`;
+          html += `<p><strong>Pool ${poolLetter}:</strong> ${poolNames.join(", ")}</p>`;
+          html += `<div id="${poolId}-matches">`;
+          html += `<ul>`;
+          for (let a = 0; a < poolNames.length; a++) {
+            for (let b = a + 1; b < poolNames.length; b++) {
+              const [sortedA, sortedB] = [poolNames[a], poolNames[b]].sort();
+              const matchId = `${divisionLabel}_${poolLetter}_${sortedA}_vs_${sortedB}`.replace(/[^a-zA-Z0-9]/g, "_");
+              const existing = savedScores[matchId];
+              const scoreAVal = existing ? existing.scoreA : "";
+              const scoreBVal = existing ? existing.scoreB : "";
+              html += `<li>`;
+              html += `${sortedA} vs. ${sortedB} `;
+              html += `<span id="scoreCell_${matchId}">${renderScoreCell(matchId, existing)}</span>`;
+              html += `</li>`;
+            }
+          }
 
           html += `</ul>`;
           html += `<button class="showStandingsBtn" data-division="${divisionLabel}" data-pool="${poolLetter}" data-pool-id="${poolId}" data-teams='${JSON.stringify(poolNames)}'>Show Standings</button>`;
@@ -737,32 +739,32 @@ html += `</li>`;
           return true;
         }
         document.querySelector(`#${elementId}`).addEventListener("click", async (e) => {
-  if (e.target.classList.contains("saveScoreBtn")) {
-    const matchId = e.target.dataset.match;
-    const cell = document.querySelector(`#scoreCell_${matchId}`);
-    const scoreAInput = cell.querySelector(".scoreA");
-    const scoreBInput = cell.querySelector(".scoreB");
-    const scoreA = parseInt(scoreAInput.value);
-    const scoreB = parseInt(scoreBInput.value);
-    if (isNaN(scoreA) || isNaN(scoreB)) {
-      alert("Please enter both scores before saving.");
-      return;
-    }
-    if (!isValidPickleballScore(scoreA, scoreB)) {
-      alert("Invalid score. A team must win by at least 2 points, and the winning score must be 11 or higher.");
-      return;
-    }
-    await saveMatchScore(matchId, scoreA, scoreB);
-    cell.innerHTML = renderScoreCell(matchId, { scoreA, scoreB });
-  }
+          if (e.target.classList.contains("saveScoreBtn")) {
+            const matchId = e.target.dataset.match;
+            const cell = document.querySelector(`#scoreCell_${matchId}`);
+            const scoreAInput = cell.querySelector(".scoreA");
+            const scoreBInput = cell.querySelector(".scoreB");
+            const scoreA = parseInt(scoreAInput.value);
+            const scoreB = parseInt(scoreBInput.value);
+            if (isNaN(scoreA) || isNaN(scoreB)) {
+              alert("Please enter both scores before saving.");
+              return;
+            }
+            if (!isValidPickleballScore(scoreA, scoreB)) {
+              alert("Invalid score. A team must win by at least 2 points, and the winning score must be 11 or higher.");
+              return;
+            }
+            await saveMatchScore(matchId, scoreA, scoreB);
+            cell.innerHTML = renderScoreCell(matchId, { scoreA, scoreB });
+          }
 
-  if (e.target.classList.contains("editScoreBtn")) {
-    const matchId = e.target.dataset.match;
-    const cell = document.querySelector(`#scoreCell_${matchId}`);
-    const existing = { scoreA: e.target.dataset.scorea, scoreB: e.target.dataset.scoreb };
-    cell.innerHTML = renderScoreCell(matchId, existing, true);
-  }
-});
+          if (e.target.classList.contains("editScoreBtn")) {
+            const matchId = e.target.dataset.match;
+            const cell = document.querySelector(`#scoreCell_${matchId}`);
+            const existing = { scoreA: e.target.dataset.scorea, scoreB: e.target.dataset.scoreb };
+            cell.innerHTML = renderScoreCell(matchId, existing, true);
+          }
+        });
         document.querySelectorAll(`#${elementId} .scoreA, #${elementId} .scoreB`).forEach(input => {
           input.addEventListener("input", () => {
             const matchId = input.dataset.match;
@@ -816,118 +818,122 @@ html += `</li>`;
             advancingDiv.style.display = "none";
             return;
           }
-                const results = await getAdvancingTeams(divisionLabel, poolsOfNames);
-      let advancingHtml = `<table border="1" cellpadding="5"><tr><th>Pool</th><th>1st Place</th><th>2nd Place</th></tr>`;
-      results.forEach(r => {
-        advancingHtml += `<tr><td>${r.pool}</td><td>${r.first}</td><td>${r.second}</td></tr>`;
-      });
-      advancingHtml += `</table>`;
+          const results = await getAdvancingTeams(divisionLabel, poolsOfNames);
+          let advancingHtml = `<table border="1" cellpadding="5"><tr><th>Pool</th><th>1st Place</th><th>2nd Place</th></tr>`;
+          results.forEach(r => {
+            advancingHtml += `<tr><td>${r.pool}</td><td>${r.first}</td><td>${r.second}</td></tr>`;
+          });
+          advancingHtml += `</table>`;
 
-      const ranked = rankAdvancingTeams(results);
-      advancingHtml += `<h4>Seeding</h4>`;
-      advancingHtml += `<table border="1" cellpadding="5"><tr><th>Seed</th><th>Team</th><th>Pool</th><th>Place</th><th>Record</th><th>Win %</th><th>Avg Diff</th><th>Avg Pts</th><th>Note</th></tr>`;
-      ranked.forEach(e => {
-        const note = (e.crossTie || e.tied) ? "Tie - playoff to 7, win by 2" : "";
-        const avgDiffText = (e.avgDiff > 0 ? "+" : "") + e.avgDiff.toFixed(1);
-        advancingHtml += `<tr><td>${e.seed}</td><td>${e.team}</td><td>${e.pool}</td><td>${e.place}</td><td>${e.wins}-${e.losses}</td><td>${(e.winPct * 100).toFixed(0)}%</td><td>${avgDiffText}</td><td>${e.avgPoints.toFixed(1)}</td><td>${note}</td></tr>`;
-      });
-      advancingHtml += `</table>`;      
-            try {
-        const esc = v => String(v).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-        const semiSnaps = await Promise.all([1, 2].map(slot => getDoc(doc(db, "bracketMatches", bracketMatchId(divisionLabel, slot)))));
-        const semis = semiSnaps.filter(s => s.exists()).map(s => s.data());
-        advancingHtml += `<h4>Semifinals</h4>`;
-        if (semis.length === 0) {
-          advancingHtml += `<p>No semifinals created yet.</p>`;
-        } else {
-const canEditScores = typeof role !== "undefined" && ["admin", "editor"].includes(String(role).toLowerCase());        advancingHtml += `<table border="1" cellpadding="5"><tr><th>Semifinal</th><th>Team A</th><th>Score A</th><th>Team B</th><th>Score B</th><th>Status</th>${canEditScores ? "<th>Enter scores</th>" : ""}</tr>`;
-        semis.forEach(s => {
-          const scoreA = s.scoreA != null ? s.scoreA : "-";
-          const scoreB = s.scoreB != null ? s.scoreB : "-";
-          const editCell = canEditScores
-            ? `<td><input type="number" min="0" step="1" class="semi-input-a" data-slot="${esc(s.slot)}" value="${s.scoreA != null ? esc(s.scoreA) : ""}" style="width:60px"> - <input type="number" min="0" step="1" class="semi-input-b" data-slot="${esc(s.slot)}" value="${s.scoreB != null ? esc(s.scoreB) : ""}" style="width:60px"> <button type="button" class="semi-save-btn" data-slot="${esc(s.slot)}">Save</button></td>`
-            : "";
-          advancingHtml += `<tr><td>${esc(s.slot)}</td><td>${esc(s.teamA)} (Seed ${esc(s.seedA)})</td><td>${esc(scoreA)}</td><td>${esc(s.teamB)} (Seed ${esc(s.seedB)})</td><td>${esc(scoreB)}</td><td>${s.completed ? "Complete" : "Not played"}</td>${editCell}</tr>`;
-        });
-        advancingHtml += `</table>`;
-        if (canEditScores) advancingHtml += `<p id="semiScoreMsg"></p>`;        }
-      } catch (err) {
-        console.error("Could not load semifinals:", err);
-        advancingHtml += `<p>Could not load semifinals.</p>`;
-      }
-const canCreateSemis = typeof role !== "undefined" && ["admin", "editor"].includes(String(role).toLowerCase());
-if (canCreateSemis) {        advancingHtml += `<br><button class="createSemisBtn">Create Semifinals</button><div class="semisMessage"></div>`;
-      }
-      advancingDiv.innerHTML = advancingHtml;
-          advancingDiv.querySelectorAll(".semi-save-btn").forEach((saveBtn) => {
-      saveBtn.addEventListener("click", async () => {
-        const msgEl = advancingDiv.querySelector("#semiScoreMsg");
-        const setMsg = (text) => {
-          if (msgEl) msgEl.textContent = text;
-        };
-
-if (!["admin", "editor"].includes(String(role).toLowerCase())) {
-  setMsg("Only an admin or editor can save scores.");
-  return;
-}        const row = saveBtn.closest("tr");
-        const inputA = row ? row.querySelector(".semi-input-a") : null;
-        const inputB = row ? row.querySelector(".semi-input-b") : null;
-        if (!inputA || !inputB) {
-          setMsg("Score boxes were not found. Nothing was saved.");
-          return;
-        }
-
-        const rawA = inputA.value.trim();
-        const rawB = inputB.value.trim();
-        if (!/^\d+$/.test(rawA) || !/^\d+$/.test(rawB)) {
-          setMsg("Enter whole numbers, zero or higher, for both scores.");
-          return;
-        }
-
-        const scoreA = Number(rawA);
-        const scoreB = Number(rawB);
-        if (scoreA === scoreB) {
-          setMsg("Scores cannot be tied. Enter a winning score.");
-          return;
-        }
-
-        saveBtn.disabled = true;
-        setMsg("Saving...");
-        try {
-          const matchId = bracketMatchId(divisionLabel, saveBtn.dataset.slot);
-          await saveBracketScore(matchId, scoreA, scoreB);
-          setMsg("Score saved. Click View Advancing Teams twice to refresh the table.");
-        } catch (err) {
-          console.error("Could not save semifinal score:", err);
-          setMsg("Could not save the score. Please try again.");
-        }
-        saveBtn.disabled = false;
-      });
-    });
-      if (canCreateSemis) {
-        advancingDiv.querySelector(".createSemisBtn").addEventListener("click", async () => {
-          const msgDiv = advancingDiv.querySelector(".semisMessage");
-          msgDiv.style.whiteSpace = "pre-line";
-          const pairings = buildBracketPairings(ranked);
-          if (!pairings.ok) {
-            msgDiv.textContent = "Cannot create semifinals: " + pairings.reason;
-            return;
-          }
+          const ranked = rankAdvancingTeams(results);
+          advancingHtml += `<h4>Seeding</h4>`;
+          advancingHtml += `<table border="1" cellpadding="5"><tr><th>Seed</th><th>Team</th><th>Pool</th><th>Place</th><th>Record</th><th>Win %</th><th>Avg Diff</th><th>Avg Pts</th><th>Note</th></tr>`;
+          ranked.forEach(e => {
+            const note = (e.crossTie || e.tied) ? "Tie - playoff to 7, win by 2" : "";
+            const avgDiffText = (e.avgDiff > 0 ? "+" : "") + e.avgDiff.toFixed(1);
+            advancingHtml += `<tr><td>${e.seed}</td><td>${e.team}</td><td>${e.pool}</td><td>${e.place}</td><td>${e.wins}-${e.losses}</td><td>${(e.winPct * 100).toFixed(0)}%</td><td>${avgDiffText}</td><td>${e.avgPoints.toFixed(1)}</td><td>${note}</td></tr>`;
+          });
+          advancingHtml += `</table>`;
           try {
-            const existing = await getDoc(doc(db, "bracketMatches", bracketMatchId(divisionLabel, 1)));
-            if (existing.exists()) {
-              const overwrite = confirm("Semifinals already exist for this division. Creating them again will erase any saved semifinal scores. Continue?");
-              if (!overwrite) return;
+            const esc = v => String(v).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+            const semiSnaps = await Promise.all([1, 2].map(slot => getDoc(doc(db, "bracketMatches", bracketMatchId(divisionLabel, slot)))));
+            const semis = semiSnaps.filter(s => s.exists()).map(s => s.data());
+            advancingHtml += `<h4>Semifinals</h4>`;
+            if (semis.length === 0) {
+              advancingHtml += `<p>No semifinals created yet.</p>`;
+            } else {
+              const canEditScores = typeof role !== "undefined" && ["admin", "editor"].includes(String(role).toLowerCase()); advancingHtml += `<table border="1" cellpadding="5"><tr><th>Semifinal</th><th>Team A</th><th>Score A</th><th>Team B</th><th>Score B</th><th>Status</th>${canEditScores ? "<th>Enter scores</th>" : ""}</tr>`;
+              semis.forEach(s => {
+                const scoreA = s.scoreA != null ? s.scoreA : "-";
+                const scoreB = s.scoreB != null ? s.scoreB : "-";
+                const editCell = canEditScores
+                  ? `<td><input type="number" min="0" step="1" class="semi-input-a" data-slot="${esc(s.slot)}" value="${s.scoreA != null ? esc(s.scoreA) : ""}" style="width:60px"> - <input type="number" min="0" step="1" class="semi-input-b" data-slot="${esc(s.slot)}" value="${s.scoreB != null ? esc(s.scoreB) : ""}" style="width:60px"> <button type="button" class="semi-save-btn" data-slot="${esc(s.slot)}">Save</button></td>`
+                  : "";
+                advancingHtml += `<tr><td>${esc(s.slot)}</td><td>${esc(s.teamA)} (Seed ${esc(s.seedA)})</td><td>${esc(scoreA)}</td><td>${esc(s.teamB)} (Seed ${esc(s.seedB)})</td><td>${esc(scoreB)}</td><td>${s.completed ? "Complete" : "Not played"}</td>${editCell}</tr>`;
+              });
+              advancingHtml += `</table>`;
+              if (canEditScores) advancingHtml += `<p id="semiScoreMsg"></p>`;
             }
-            await saveBracketToFirestore(divisionLabel, pairings);
-            msgDiv.textContent = "Semifinals saved:\n" + pairings.semifinals.map(s => "Semifinal " + s.slot + ": " + s.teamA.team + " vs " + s.teamB.team).join("\n");
           } catch (err) {
-            console.error("Create semifinals failed:", err);
-            msgDiv.textContent = "Could not save semifinals. Check the browser console for details.";
+            console.error("Could not load semifinals:", err);
+            advancingHtml += `<p>Could not load semifinals.</p>`;
           }
-        });
-      }
-      advancingDiv.style.display = "block";
+          const canCreateSemis = typeof role !== "undefined" && ["admin", "editor"].includes(String(role).toLowerCase());
+          if (canCreateSemis) {
+            advancingHtml += `<br><button class="createSemisBtn">Create Semifinals</button><div class="semisMessage"></div>`;
+          }
+          advancingDiv.innerHTML = advancingHtml;
+          advancingDiv.querySelectorAll(".semi-save-btn").forEach((saveBtn) => {
+            saveBtn.addEventListener("click", async () => {
+              const msgEl = advancingDiv.querySelector("#semiScoreMsg");
+              const setMsg = (text, color) => {
+                if (msgEl) {
+                  msgEl.textContent = text;
+                  msgEl.style.color = color || "";
+                }
+              };
+              if (!["admin", "editor"].includes(String(role).toLowerCase())) {
+                setMsg("Only an admin or editor can save scores.");
+                return;
+              } const row = saveBtn.closest("tr");
+              const inputA = row ? row.querySelector(".semi-input-a") : null;
+              const inputB = row ? row.querySelector(".semi-input-b") : null;
+              if (!inputA || !inputB) {
+                setMsg("Score boxes were not found. Nothing was saved.");
+                return;
+              }
+
+              const rawA = inputA.value.trim();
+              const rawB = inputB.value.trim();
+              if (!/^\d+$/.test(rawA) || !/^\d+$/.test(rawB)) {
+                setMsg("Enter whole numbers, zero or higher, for both scores.");
+                return;
+              }
+
+              const scoreA = Number(rawA);
+              const scoreB = Number(rawB);
+              if (scoreA === scoreB) {
+                setMsg("Scores cannot be tied. Enter a winning score.");
+                return;
+              }
+
+              saveBtn.disabled = true;
+              setMsg("Saving...");
+              try {
+                const matchId = bracketMatchId(divisionLabel, saveBtn.dataset.slot);
+                await saveBracketScore(matchId, scoreA, scoreB);
+                setMsg("Score saved. Click View Advancing Teams twice to refresh the table.", "#c62828");
+              } catch (err) {
+                console.error("Could not save semifinal score:", err);
+                setMsg("Could not save the score. Please try again.");
+              }
+              saveBtn.disabled = false;
+            });
+          });
+          if (canCreateSemis) {
+            advancingDiv.querySelector(".createSemisBtn").addEventListener("click", async () => {
+              const msgDiv = advancingDiv.querySelector(".semisMessage");
+              msgDiv.style.whiteSpace = "pre-line";
+              const pairings = buildBracketPairings(ranked);
+              if (!pairings.ok) {
+                msgDiv.textContent = "Cannot create semifinals: " + pairings.reason;
+                return;
+              }
+              try {
+                const existing = await getDoc(doc(db, "bracketMatches", bracketMatchId(divisionLabel, 1)));
+                if (existing.exists()) {
+                  const overwrite = confirm("Semifinals already exist for this division. Creating them again will erase any saved semifinal scores. Continue?");
+                  if (!overwrite) return;
+                }
+                await saveBracketToFirestore(divisionLabel, pairings);
+                msgDiv.textContent = "Semifinals saved:\n" + pairings.semifinals.map(s => "Semifinal " + s.slot + ": " + s.teamA.team + " vs " + s.teamB.team).join("\n");
+              } catch (err) {
+                console.error("Create semifinals failed:", err);
+                msgDiv.textContent = "Could not save semifinals. Check the browser console for details.";
+              }
+            });
+          }
+          advancingDiv.style.display = "block";
         });
 
         document.querySelector(`#${elementId} .downloadCsvBtn`).addEventListener("click", async () => {
@@ -937,105 +943,105 @@ if (!["admin", "editor"].includes(String(role).toLowerCase())) {
         document.querySelector(`#${elementId} .printResultsBtn`).addEventListener("click", async () => {
           await printResults(divisionLabel, poolsOfNames);
         });
-        
+
         document.querySelector(`#${elementId} .downloadXlsxBtn`).addEventListener("click", async () => {
           await exportResultsToExcel(divisionLabel, poolsOfNames);
         });
       }
       async function exportResultsToExcel(divisionLabel, poolsOfNames) {
-  if (typeof ExcelJS === "undefined") {
-    alert("The Excel library did not load. Refresh the page and try again.");
-    return;
-  }
+        if (typeof ExcelJS === "undefined") {
+          alert("The Excel library did not load. Refresh the page and try again.");
+          return;
+        }
 
-  const savedScores = await getMatchScores(divisionLabel);
+        const savedScores = await getMatchScores(divisionLabel);
 
-  const workbook = new ExcelJS.Workbook();
-  const sheet = workbook.addWorksheet("Pool Matches");
+        const workbook = new ExcelJS.Workbook();
+        const sheet = workbook.addWorksheet("Pool Matches");
 
-  sheet.columns = [
-    { header: "Pool", key: "pool", width: 8 },
-    { header: "Team A", key: "teamA", width: 28 },
-    { header: "Score A", key: "scoreA", width: 10 },
-    { header: "Team B", key: "teamB", width: 28 },
-    { header: "Score B", key: "scoreB", width: 10 },
-    { header: "Status", key: "status", width: 14 }
-  ];
-  sheet.getRow(1).font = { bold: true };
+        sheet.columns = [
+          { header: "Pool", key: "pool", width: 8 },
+          { header: "Team A", key: "teamA", width: 28 },
+          { header: "Score A", key: "scoreA", width: 10 },
+          { header: "Team B", key: "teamB", width: 28 },
+          { header: "Score B", key: "scoreB", width: 10 },
+          { header: "Status", key: "status", width: 14 }
+        ];
+        sheet.getRow(1).font = { bold: true };
 
-  poolsOfNames.forEach((poolNames, i) => {
-    const poolLetter = String.fromCharCode(65 + i);
-    for (let a = 0; a < poolNames.length; a++) {
-      for (let b = a + 1; b < poolNames.length; b++) {
-        const [sortedA, sortedB] = [poolNames[a], poolNames[b]].sort();
-        const matchId = `${divisionLabel}_${poolLetter}_${sortedA}_vs_${sortedB}`.replace(/[^a-zA-Z0-9]/g, "_");
-        const existing = savedScores[matchId] && savedScores[matchId].completed ? savedScores[matchId] : null;
-        const scoreA = existing && existing.scoreA != null ? existing.scoreA : "";
-        const scoreB = existing && existing.scoreB != null ? existing.scoreB : "";
-        const played = scoreA !== "" && scoreB !== "";
-        sheet.addRow({
-          pool: poolLetter,
-          teamA: sortedA,
-          scoreA: scoreA,
-          teamB: sortedB,
-          scoreB: scoreB,
-          status: played ? "Complete" : "Not played"
+        poolsOfNames.forEach((poolNames, i) => {
+          const poolLetter = String.fromCharCode(65 + i);
+          for (let a = 0; a < poolNames.length; a++) {
+            for (let b = a + 1; b < poolNames.length; b++) {
+              const [sortedA, sortedB] = [poolNames[a], poolNames[b]].sort();
+              const matchId = `${divisionLabel}_${poolLetter}_${sortedA}_vs_${sortedB}`.replace(/[^a-zA-Z0-9]/g, "_");
+              const existing = savedScores[matchId] && savedScores[matchId].completed ? savedScores[matchId] : null;
+              const scoreA = existing && existing.scoreA != null ? existing.scoreA : "";
+              const scoreB = existing && existing.scoreB != null ? existing.scoreB : "";
+              const played = scoreA !== "" && scoreB !== "";
+              sheet.addRow({
+                pool: poolLetter,
+                teamA: sortedA,
+                scoreA: scoreA,
+                teamB: sortedB,
+                scoreB: scoreB,
+                status: played ? "Complete" : "Not played"
+              });
+            }
+          }
         });
+
+        const standingsSheet = workbook.addWorksheet("Standings");
+        standingsSheet.columns = [
+          { header: "Pool", key: "pool", width: 8 },
+          { header: "Rank", key: "rank", width: 8 },
+          { header: "Team", key: "team", width: 28 },
+          { header: "Games Played", key: "gp", width: 14 },
+          { header: "Wins", key: "wins", width: 8 },
+          { header: "Losses", key: "losses", width: 8 },
+          { header: "Points For", key: "pf", width: 12 },
+          { header: "Points Against", key: "pa", width: 14 },
+          { header: "Differential", key: "diff", width: 12 },
+          { header: "Tie Flag", key: "tied", width: 24 }
+        ];
+        standingsSheet.getRow(1).font = { bold: true };
+
+        for (let i = 0; i < poolsOfNames.length; i++) {
+          const poolLetter = String.fromCharCode(65 + i);
+          const standings = await calculateStandings(divisionLabel, poolLetter, poolsOfNames[i]);
+          standings.forEach((s, index) => {
+            standingsSheet.addRow({
+              pool: poolLetter,
+              rank: index + 1,
+              team: s.team,
+              gp: s.gamesPlayed,
+              wins: s.wins,
+              losses: s.losses,
+              pf: s.pointsFor,
+              pa: s.pointsAgainst,
+              diff: s.diff,
+              tied: s.tied ? "Tied - playoff needed" : ""
+            });
+          });
+        }
+
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], {
+          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `${divisionLabel.replace(/[^a-zA-Z0-9]/g, "_")}_Results.xlsx`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
       }
-    }
-  });
-
-    const standingsSheet = workbook.addWorksheet("Standings");
-  standingsSheet.columns = [
-    { header: "Pool", key: "pool", width: 8 },
-    { header: "Rank", key: "rank", width: 8 },
-    { header: "Team", key: "team", width: 28 },
-    { header: "Games Played", key: "gp", width: 14 },
-    { header: "Wins", key: "wins", width: 8 },
-    { header: "Losses", key: "losses", width: 8 },
-    { header: "Points For", key: "pf", width: 12 },
-    { header: "Points Against", key: "pa", width: 14 },
-    { header: "Differential", key: "diff", width: 12 },
-    { header: "Tie Flag", key: "tied", width: 24 }
-  ];
-  standingsSheet.getRow(1).font = { bold: true };
-
-  for (let i = 0; i < poolsOfNames.length; i++) {
-    const poolLetter = String.fromCharCode(65 + i);
-    const standings = await calculateStandings(divisionLabel, poolLetter, poolsOfNames[i]);
-    standings.forEach((s, index) => {
-      standingsSheet.addRow({
-        pool: poolLetter,
-        rank: index + 1,
-        team: s.team,
-        gp: s.gamesPlayed,
-        wins: s.wins,
-        losses: s.losses,
-        pf: s.pointsFor,
-        pa: s.pointsAgainst,
-        diff: s.diff,
-        tied: s.tied ? "Tied - playoff needed" : ""
-      });
-    });
-  }
-
-  const buffer = await workbook.xlsx.writeBuffer();
-  const blob = new Blob([buffer], {
-    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-  });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = `${divisionLabel.replace(/[^a-zA-Z0-9]/g, "_")}_Results.xlsx`;
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  URL.revokeObjectURL(url);
-}
       document.getElementById("generateBeginnersBtn").addEventListener("click", async () => {
         const confirmGenerate = confirm("This will create new pools and matches, overwriting any existing ones. It will also delete any saved semifinals for the Beginners division. Continue?");
         if (!confirmGenerate) return;
-        await deleteBracketFromFirestore("Beginners");       
+        await deleteBracketFromFirestore("Beginners");
         const minGames = parseInt(document.getElementById("minGames").value);
         const teams = await getTeamsByDivision("Beginners");
         const poolSizes = calculatePools(teams.length, minGames);
@@ -1059,71 +1065,71 @@ if (!["admin", "editor"].includes(String(role).toLowerCase())) {
         await renderPools("poolResultsIntermediate", "Intermediate", teams.length, poolNames);
       });
       async function refreshAllPools() {
-  const savedBeginners = await loadPoolsFromFirestore("Beginners");
-  if (savedBeginners) {
-    const poolNames = savedBeginners.map(p => p.teams);
-    await renderPools("poolResultsBeginners", "Beginners", poolNames.flat().length, poolNames);
-  }
-  const savedIntermediate = await loadPoolsFromFirestore("Intermediate");
-  if (savedIntermediate) {
-    const poolNames = savedIntermediate.map(p => p.teams);
-    await renderPools("poolResultsIntermediate", "Intermediate", poolNames.flat().length, poolNames);
-  }
-}
-window.window.refreshAllPools = refreshAllPools;
-refreshAllPools();
-
-async function checkPoolCompletion(divisionLabel, poolsOfNames) {
-  const savedScores = await getMatchScores(divisionLabel);
-  const results = [];
-
-  poolsOfNames.forEach((poolNames, i) => {
-    const poolLetter = String.fromCharCode(65 + i);
-    let allComplete = true;
-
-    for (let a = 0; a < poolNames.length; a++) {
-      for (let b = a + 1; b < poolNames.length; b++) {
-        const [sortedA, sortedB] = [poolNames[a], poolNames[b]].sort();
-        const matchId = `${divisionLabel}_${poolLetter}_${sortedA}_vs_${sortedB}`.replace(/[^a-zA-Z0-9]/g, "_");
-        const existing = savedScores[matchId];
-        if (!existing || !existing.completed) allComplete = false;
+        const savedBeginners = await loadPoolsFromFirestore("Beginners");
+        if (savedBeginners) {
+          const poolNames = savedBeginners.map(p => p.teams);
+          await renderPools("poolResultsBeginners", "Beginners", poolNames.flat().length, poolNames);
+        }
+        const savedIntermediate = await loadPoolsFromFirestore("Intermediate");
+        if (savedIntermediate) {
+          const poolNames = savedIntermediate.map(p => p.teams);
+          await renderPools("poolResultsIntermediate", "Intermediate", poolNames.flat().length, poolNames);
+        }
       }
-    }
+      window.window.refreshAllPools = refreshAllPools;
+      refreshAllPools();
 
-    console.log(`Pool ${poolLetter} (${divisionLabel}) complete: ${allComplete}`);
-    results.push({ poolLetter, complete: allComplete });
-  });
+      async function checkPoolCompletion(divisionLabel, poolsOfNames) {
+        const savedScores = await getMatchScores(divisionLabel);
+        const results = [];
 
-  const allPoolsComplete = results.every(r => r.complete);
-  console.log(`All pools complete for ${divisionLabel}: ${allPoolsComplete}`);
-  return results;
-}
-window.checkPoolCompletion = checkPoolCompletion;
-        
-      if (document.getElementById("testPoolsBtn")) {
-      document.getElementById("testPoolsBtn").addEventListener("click", () => {
-        console.log("9 teams, 3 min games:", calculatePools(9, 3));
-        console.log("9 teams, 4 min games:", calculatePools(9, 4));
-        console.log("11 teams, 4 min games:", calculatePools(11, 4));
-        console.log("15 teams, 3 min games:", calculatePools(15, 3));
-        console.log("15 teams, 4 min games:", calculatePools(15, 4));
+        poolsOfNames.forEach((poolNames, i) => {
+          const poolLetter = String.fromCharCode(65 + i);
+          let allComplete = true;
+
+          for (let a = 0; a < poolNames.length; a++) {
+            for (let b = a + 1; b < poolNames.length; b++) {
+              const [sortedA, sortedB] = [poolNames[a], poolNames[b]].sort();
+              const matchId = `${divisionLabel}_${poolLetter}_${sortedA}_vs_${sortedB}`.replace(/[^a-zA-Z0-9]/g, "_");
+              const existing = savedScores[matchId];
+              if (!existing || !existing.completed) allComplete = false;
+            }
+          }
+
+          console.log(`Pool ${poolLetter} (${divisionLabel}) complete: ${allComplete}`);
+          results.push({ poolLetter, complete: allComplete });
         });
-}
 
-if (document.getElementById("checkCompletionBtn")) {
-  document.getElementById("checkCompletionBtn").addEventListener("click", async () => {
-    const savedBeginners = await loadPoolsFromFirestore("Beginners");
-    if (savedBeginners) {
-      const poolNames = savedBeginners.map(p => p.teams);
-      await checkPoolCompletion("Beginners", poolNames);
-    }
-    const savedIntermediate = await loadPoolsFromFirestore("Intermediate");
-    if (savedIntermediate) {
-      const poolNames = savedIntermediate.map(p => p.teams);
-      await checkPoolCompletion("Intermediate", poolNames);
-    }
-  });
-}
+        const allPoolsComplete = results.every(r => r.complete);
+        console.log(`All pools complete for ${divisionLabel}: ${allPoolsComplete}`);
+        return results;
+      }
+      window.checkPoolCompletion = checkPoolCompletion;
+
+      if (document.getElementById("testPoolsBtn")) {
+        document.getElementById("testPoolsBtn").addEventListener("click", () => {
+          console.log("9 teams, 3 min games:", calculatePools(9, 3));
+          console.log("9 teams, 4 min games:", calculatePools(9, 4));
+          console.log("11 teams, 4 min games:", calculatePools(11, 4));
+          console.log("15 teams, 3 min games:", calculatePools(15, 3));
+          console.log("15 teams, 4 min games:", calculatePools(15, 4));
+        });
+      }
+
+      if (document.getElementById("checkCompletionBtn")) {
+        document.getElementById("checkCompletionBtn").addEventListener("click", async () => {
+          const savedBeginners = await loadPoolsFromFirestore("Beginners");
+          if (savedBeginners) {
+            const poolNames = savedBeginners.map(p => p.teams);
+            await checkPoolCompletion("Beginners", poolNames);
+          }
+          const savedIntermediate = await loadPoolsFromFirestore("Intermediate");
+          if (savedIntermediate) {
+            const poolNames = savedIntermediate.map(p => p.teams);
+            await checkPoolCompletion("Intermediate", poolNames);
+          }
+        });
+      }
       if (role.toLowerCase() === "admin") {
         document.getElementById("resetBtn").addEventListener("click", async () => {
           const confirmReset = confirm("Are you sure you want to delete ALL teams? This cannot be undone.");
