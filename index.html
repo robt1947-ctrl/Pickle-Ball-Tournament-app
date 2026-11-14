@@ -832,6 +832,26 @@ html += `</li>`;
         advancingHtml += `<tr><td>${e.seed}</td><td>${e.team}</td><td>${e.pool}</td><td>${e.place}</td><td>${e.wins}-${e.losses}</td><td>${(e.winPct * 100).toFixed(0)}%</td><td>${avgDiffText}</td><td>${e.avgPoints.toFixed(1)}</td><td>${note}</td></tr>`;
       });
       advancingHtml += `</table>`;      
+            try {
+        const esc = v => String(v).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+        const semiSnaps = await Promise.all([1, 2].map(slot => getDoc(doc(db, "bracketMatches", bracketMatchId(divisionLabel, slot)))));
+        const semis = semiSnaps.filter(s => s.exists()).map(s => s.data());
+        advancingHtml += `<h4>Semifinals</h4>`;
+        if (semis.length === 0) {
+          advancingHtml += `<p>No semifinals created yet.</p>`;
+        } else {
+          advancingHtml += `<table border="1" cellpadding="5"><tr><th>Semifinal</th><th>Team A</th><th>Score A</th><th>Team B</th><th>Score B</th><th>Status</th></tr>`;
+          semis.forEach(s => {
+            const scoreA = s.scoreA != null ? s.scoreA : "-";
+            const scoreB = s.scoreB != null ? s.scoreB : "-";
+            advancingHtml += `<tr><td>${esc(s.slot)}</td><td>${esc(s.teamA)} (Seed ${esc(s.seedA)})</td><td>${esc(scoreA)}</td><td>${esc(s.teamB)} (Seed ${esc(s.seedB)})</td><td>${esc(scoreB)}</td><td>${s.completed ? "Complete" : "Not played"}</td></tr>`;
+          });
+          advancingHtml += `</table>`;
+        }
+      } catch (err) {
+        console.error("Could not load semifinals:", err);
+        advancingHtml += `<p>Could not load semifinals.</p>`;
+      }
       const canCreateSemis = typeof role !== "undefined" && String(role).toLowerCase() === "admin";
       if (canCreateSemis) {
         advancingHtml += `<br><button class="createSemisBtn">Create Semifinals</button><div class="semisMessage"></div>`;
